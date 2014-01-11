@@ -1,0 +1,7 @@
+{
+  "name": "Development",
+  "description": "Development Environment",
+  "cookbook_versions": {
+    "apt": "~> 2.3.0"
+  }
+}
