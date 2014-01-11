@@ -1,9 +1,3 @@
-# Third-party artifacts
-jdk-7u45-linux-x64.tar.gz
-wls_121200.jar
-saucy-server-cloudimg-amd64-vagrant-disk1.box
-raring-server-cloudimg-amd64-vagrant-disk1.box
-
 # Vagrant
 .vagrant
 vagrant-data
