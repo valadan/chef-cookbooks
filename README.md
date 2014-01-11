@@ -1,13 +1,14 @@
 Vagrant Chef Oracle Project
 ---------------------------
 
-Project to create an Oracle/Java Development VM with all applications other than an IDE, to build and test Java EE projects.
+Cookbook Project to create an Oracle/Java Development VM with all applications other than an IDE, to build and test Java EE projects.
 
 <h4>Major Components</h4>
-* Oracle JDK
+* Oracle JDK 1.7.0_45-b18 and all alternatives
 * Oracle-related Environment variables
-* WebLogic Server / domain / managed server
-* Oracle Database Express Edition
+* WebLogic Server 12.1.2
+* (1) WLS domain / (1) WLS managed server
+* Oracle Database Express Edition (TBD)
 
 <h4>Recipes Tested and Working</h4>
 <table>
@@ -15,7 +16,7 @@ Project to create an Oracle/Java Development VM with all applications other than
     <th>Recipe</th><th>Description</th>
   </tr>
   <tr>
-    <td>install-java</td><td>Installs Oracle JDK 1.7.0_45</td>
+    <td>install-java</td><td>Installs Oracle JDK 1.7.0_45-b18 and all alternatives</td>
   </tr>
   <tr>
     <td>install-env-vars</td><td>Installs Oracle-related environment variables</td>
@@ -31,9 +32,9 @@ Project to create an Oracle/Java Development VM with all applications other than
   </tr>
 </table>
 
-<h4>Required Downloads to 'artifacts'</h4>
+<h4>Required Downloads to 'artifacts' folder within this repo</h4>
 * *[jdk-7u45-linux-x64.tar.gz] (http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)*
 * *[wls_121200.jar] (http://www.oracle.com/technetwork/middleware/weblogic/downloads/wls-for-dev-1703574.html)*
 
-<h4>Required Ubuntu Cloud Image to 'vagrant-oracle-repo'</h4>
-* *[saucy-server-cloudimg-amd64-vagrant-disk1.box] (http://cloud-images.ubuntu.com/vagrant/saucy/)*
+<h4>Ubuntu Cloud Image Used to Create VM</h4>
+* *[precise-server-cloudimg-amd64-vagrant-disk1.box] (http://cloud-images.ubuntu.com/vagrant/precise/current/)*

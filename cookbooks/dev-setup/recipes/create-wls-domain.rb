@@ -64,6 +64,8 @@ bash 'create-domain' do
   action :run
 end
 
+# this works, but if you run it, provisioning never stops running, since domain is running.
+# need a better alternative, like create a shell script that can be called after provisioning.
 bash 'start-domain' do
   code <<-EOF
     java -verbose \
