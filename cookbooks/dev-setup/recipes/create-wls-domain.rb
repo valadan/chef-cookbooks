@@ -48,15 +48,17 @@ end
 # installer asks to create? y/n?
 bash 'create-domain' do
   cwd "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains"
+  timeout 180
   code <<-EOF
-    echo 'Y' | java -verbose \
-    -XX:MaxPermSize=2048m -Xms512m -Xmx2048m \
+    echo 'Y' | java \
+    -XX:MaxPermSize=1048m -Xms512m -Xmx1024m \
     -Dweblogic.Domain=#{node['dev']['wls_domain']} \
     -Dweblogic.Name=#{node['dev']['wls_server']} \
     -Dweblogic.management.username=#{node['dev']['wls_username']} \
     -Dweblogic.management.password=#{node['dev']['wls_password']} \
     -Dweblogic.ListenPort=#{node['dev']['wls_port']} \
     -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server
+    exit $?
    EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
@@ -67,14 +69,16 @@ end
 # this works, but if you run it, provisioning never stops running, since domain is running.
 # need a better alternative, like create a shell script that can be called after provisioning.
 bash 'start-domain' do
+  cwd "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains"
   code <<-EOF
     java -verbose \
-    -XX:MaxPermSize=2048m -Xms512m -Xmx2048m \
+    -XX:MaxPermSize=1024m -Xms512m -Xmx1024m \
     -Dweblogic.Name=#{node['dev']['wls_server']} \
-    -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server
+    -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server \
+    >> start_domain.sh
    EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?(domains_home_tmp) }
-  #action :run
+  action :run
 end
