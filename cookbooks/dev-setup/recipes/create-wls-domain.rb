@@ -66,6 +66,14 @@ bash 'create-domain' do
   action :run
 end
 
+bash 'enable-tunneling' do
+  cwd "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains/config"
+  code "sed -i 's/<tunneling-enabled>false/<tunneling-enabled>true/g' config.xml"
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+  action :run
+end
+
 # this works, but if you run it, provisioning never stops running, since domain is running.
 # need a better alternative, like create a shell script that can be called after provisioning.
 bash 'start-domain' do
