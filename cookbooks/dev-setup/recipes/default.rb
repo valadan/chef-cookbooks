@@ -11,5 +11,5 @@
 #include_recipe	install-env-vars
 #include_recipe	create-swapfile
 #include_recipe	install-wls
-##include_recipe	remove-swapfile
+#include_recipe	remove-swapfile
 #include_recipe	create-wls-domain
