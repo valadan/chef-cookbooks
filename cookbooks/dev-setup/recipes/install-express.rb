@@ -17,19 +17,78 @@
 # limitations under the License.
 #
 
+# copy zipped Oracle Database XE package to home directory
 remote_file "copy-express-to-home" do 
-  path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}" 
-  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}"
+  path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.rpm.zip" 
+  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.rpm.zip"
   checksum node['dev']['wls_pkg_checksum']
   owner node['dev']['global_user']
   group node['dev']['global_group']
   mode 0755
-  not_if { ::File.exists?(wl_home_tmp) }
+  #not_if { ::File.exists?(wl_home_tmp) }
 end
 
+# unzip Oracle Database XE package
+bash "unzip-express" do
+  cwd "#{node['dev']['global_user_home']}"
+  code "/usr/bin/unzip -o #{node['dev']['express_package']}.rpm.zip"
+  user node['dev']['global_user']
+  action :run
+end
+
+
+=begin
+# copy static response file to home directory
 cookbook_file "#{node['dev']['global_user_home']}/#{node['dev']['express_response_file']}" do
   source node['dev']['express_response_file']
   owner node['dev']['global_user']
   group node['dev']['global_group']
   mode 0755
+end
+=end
+
+# create response file dynamically
+bash "create_response_file" do
+  cwd "#{node['dev']['global_user_home']}"
+  code <<-EOH
+    echo
+    ORACLE_LISTENER_PORT='#{node['dev']['express_listen_port']}\n'
+    ORACLE_HTTP_PORT='#{node['dev']['express_http_port']}\n'
+    ORACLE_PASSWORD='#{node['dev']['express_password']}\n'
+    ORACLE_CONFIRM_PASSWORD='#{node['dev']['express_password']}\n'
+    ORACLE_DBENABLE=y
+    > ['express_response_file']}
+    EOH
+  action :run
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+end
+
+# install Oracle Database XE
+bash "create_response_file" do
+  cwd "#{node['dev']['global_user_home']}"
+  code <<-EOH
+    rpm -ivh  #{node['dev']['express_package']} > /xe_logs/XEsilentinstall.log
+    /etc/init.d/oracle-xe configure responseFile=#{node['dev']['express_response_file']} >> /xe_logs/XEsilentinstall.log
+    EOH
+  action :run
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+end
+
+# set Oracle Database XE environment variables
+bash "set_express_env_vars" do
+  cwd "/u01/app/oracle/product/11.2.0/xe/bin"
+  code ". ./oracle_env.sh"
+  action :run
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+end
+
+# environment variables are set properly each time you log in or open a new shell
+bash "bash-login" do
+  code "echo '. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh' > #{node['dev']['global_user_home']}/.bashrc"
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+  action :run
 end
