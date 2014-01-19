@@ -60,13 +60,13 @@ bash "unzip-express" do
   code "unzip -o #{node['dev']['express_package']}.zip"
   user node['dev']['global_user']
   action :run
-    not_if { ::File.exists?("#{node['dev']['global_user_home']}/Disk1/oracle-xe-11.2.0-1.0.x86_64.rpm") }
+    not_if { ::File.exists?("#{node['dev']['global_user_home']}/Disk1/#{node['dev']['express_package']}") }
 end
 
 # covert to .deb
 bash "convert-rpm" do
   cwd "#{node['dev']['global_user_home']}/Disk1"
-  code "alien --to-deb --scripts #{node['dev']['express_package']}.zip"
+  code "alien --to-deb --scripts #{node['dev']['express_package']}"
   creates "#{node['dev']['express_package']}.deb"
   action :run
 end
