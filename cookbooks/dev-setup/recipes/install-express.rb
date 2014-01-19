@@ -33,8 +33,16 @@ remote_file "copy-express-to-home" do
 end
 
 # install unzip
-bash "unzip-express" do
+bash "install-unzip" do
   code "sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get install unzip -y"
+  user node['dev']['global_user']
+  action :run
+  not_if { ::File.exists?("/usr/bin/unzip") }
+end
+
+# install rpm
+bash "install-rpm" do
+  code "sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get install rpm -y"
   user node['dev']['global_user']
   action :run
   not_if { ::File.exists?("/usr/bin/unzip") }
