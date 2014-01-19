@@ -29,7 +29,7 @@ remote_file "copy-express-to-home" do
   owner node['dev']['global_user']
   group node['dev']['global_group']
   mode 0755
-  #not_if { ::File.exists?(wl_home_tmp) }
+  not_if { ::File.exists?("#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.rpm.zip") }
 end
 
 # install unzip
@@ -37,6 +37,7 @@ bash "unzip-express" do
   code "sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get install unzip -y"
   user node['dev']['global_user']
   action :run
+  not_if { ::File.exists?(wl_home_tmp) }
 end
 
 # unzip Oracle Database XE package
@@ -67,7 +68,7 @@ bash "create_response_file" do
     ORACLE_PASSWORD='#{node['dev']['express_password']}\n'
     ORACLE_CONFIRM_PASSWORD='#{node['dev']['express_password']}\n'
     ORACLE_DBENABLE=y
-    > ['express_response_file']}
+    > #{node['dev']['express_response_file']}
     EOH
   action :run
   user node['dev']['global_user']
