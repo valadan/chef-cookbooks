@@ -21,21 +21,9 @@
 # http://docs.oracle.com/cd/E17781_01/install.112/e18802/toc.htm#BABCEAHD
 # http://docs.oracle.com/cd/E17781_01/install.112/e18802/toc.htm
 
-# copy zipped Oracle Database XE package to home directory
-remote_file "copy-express-to-home" do 
-  path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip" 
-  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.zip"
-  checksum node['dev']['wls_pkg_checksum']
-  owner node['dev']['global_user']
-  group node['dev']['global_group']
-  mode 0755
-  not_if { ::File.exists?("#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip") }
-end
-
 # apt update/upgrade
 bash "apt-update" do
   code "sudo apt-get update -y && sudo apt-get upgrade -y"
-  user node['dev']['global_user']
   action :run
 end
 
@@ -55,19 +43,30 @@ apt_package "libaio1" do
   action :install
 end
 
+# copy zipped Oracle Database XE package to home directory
+remote_file "copy-express-to-home" do 
+  path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip" 
+  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.zip"
+  checksum node['dev']['wls_pkg_checksum']
+  owner node['dev']['global_user']
+  group node['dev']['global_group']
+  mode 0755
+  not_if { ::File.exists?("#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip") }
+end
+
 # unzip Oracle Database XE package
 bash "unzip-express" do
   cwd "#{node['dev']['global_user_home']}"
   code "unzip -o #{node['dev']['express_package']}.zip"
   user node['dev']['global_user']
   action :run
+    not_if { ::File.exists?("#{node['dev']['global_user_home']}/Disk1/oracle-xe-11.2.0-1.0.x86_64.rpm") }
 end
 
 # covert to .deb
 bash "convert-rpm" do
   cwd "#{node['dev']['global_user_home']}/Disk1"
   code "alien --to-deb --scripts #{node['dev']['express_package']}.zip"
-  user node['dev']['global_user']
   creates "#{node['dev']['express_package']}.deb"
   action :run
 end
