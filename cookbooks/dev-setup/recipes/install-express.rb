@@ -32,20 +32,19 @@ remote_file "copy-express-to-home" do
   not_if { ::File.exists?("#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.rpm.zip") }
 end
 
-# install unzip
-bash "install-unzip" do
-  code "sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get install unzip -y"
+# apt update/upgrade
+bash "apt-update" do
+  code "sudo apt-get update -y && sudo apt-get upgrade -y"
   user node['dev']['global_user']
   action :run
-  not_if { ::File.exists?("/usr/bin/unzip") }
 end
 
-# install rpm
-bash "install-rpm" do
-  code "sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get install rpm -y"
-  user node['dev']['global_user']
-  action :run
-  not_if { ::File.exists?("/usr/bin/unzip") }
+apt_package "rpm" do
+  action :install
+end
+
+apt_package "unzip" do
+  action :install
 end
 
 # unzip Oracle Database XE package
