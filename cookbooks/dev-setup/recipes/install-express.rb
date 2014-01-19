@@ -63,10 +63,10 @@ bash "create_response_file" do
   cwd "#{node['dev']['global_user_home']}"
   code <<-EOH
     echo \
-    "ORACLE_LISTENER_PORT='#{node['dev']['express_listen_port']}\n' \
-    ORACLE_HTTP_PORT='#{node['dev']['express_http_port']}\n' \
-    ORACLE_PASSWORD='#{node['dev']['express_password']}\n' \
-    ORACLE_CONFIRM_PASSWORD='#{node['dev']['express_password']}\n' \
+    "ORACLE_LISTENER_PORT=#{node['dev']['express_listen_port']}\n \
+    ORACLE_HTTP_PORT=#{node['dev']['express_http_port']}\n \
+    ORACLE_PASSWORD=#{node['dev']['express_password']}\n \
+    ORACLE_CONFIRM_PASSWORD=#{node['dev']['express_password']}\n \
     ORACLE_DBENABLE=y" \
     > #{node['dev']['express_response_file']}
     EOH
