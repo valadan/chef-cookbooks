@@ -75,6 +75,11 @@ bash "create_response_file" do
   group node['dev']['global_group']
 end
 
+directory "/xe_logs" do
+  mode 0777
+  action :create
+end
+
 # install Oracle Database XE
 bash "install_express" do
   cwd "#{node['dev']['global_user_home']}"

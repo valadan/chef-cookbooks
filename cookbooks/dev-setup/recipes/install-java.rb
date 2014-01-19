@@ -38,6 +38,7 @@ bash "install-java" do
   code "sh #{node['dev']['global_user_home']}/#{node['dev']['java_install_jdk']}"
   user node['dev']['global_user']
   action :run
+  not_if { ::File.exists?("/usr/lib/jvm/jdk1.7.0_45/bin/java") }
 end
 
 =begin
