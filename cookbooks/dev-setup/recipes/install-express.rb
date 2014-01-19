@@ -37,7 +37,7 @@ bash "unzip-express" do
   code "sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get install unzip -y"
   user node['dev']['global_user']
   action :run
-  not_if { ::File.exists?(wl_home_tmp) }
+  not_if { ::File.exists?("/usr/bin/unzip") }
 end
 
 # unzip Oracle Database XE package
