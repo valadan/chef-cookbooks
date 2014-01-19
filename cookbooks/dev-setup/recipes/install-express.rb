@@ -60,15 +60,16 @@ bash "unzip-express" do
   code "unzip -o #{node['dev']['express_package']}.zip"
   user node['dev']['global_user']
   action :run
-    not_if { ::File.exists?("#{node['dev']['global_user_home']}/Disk1/#{node['dev']['express_package']}") }
+  not_if { ::File.exists?("#{node['dev']['global_user_home']}/Disk1/#{node['dev']['express_package']}") }
 end
 
-# covert to .deb
+# covert to .deb with alien for Ubuntu
 bash "convert-rpm" do
   cwd "#{node['dev']['global_user_home']}/Disk1"
   code "alien --to-deb --scripts #{node['dev']['express_package']}"
   creates "#{node['dev']['express_package']}.deb"
   action :run
+  not_if { ::File.exists?("#{node['dev']['global_user_home']}/Disk1/#{node['dev']['express_package']}.deb") }
 end
 
 =begin
@@ -101,24 +102,27 @@ end
 directory "/xe_logs" do
   mode 0777
   action :create
+  not_if { ::File.exists?("/xe_logs") }
+end
+
+# install Oracle Database XE
+bash "install_express" do
+  cwd "#{node['dev']['global_user_home']}/Disk1"
+  code "sudo dpkg --install #{node['dev']['express_package']} > /xe_logs/XEsilentinstall.log"
+  action :run
+  user node['dev']['global_user']
+  not_if { ::File.exists?("/etc/init.d/oracle-xe") }
 end
 
 =begin
-# install Oracle Database XE
-bash "install_express1" do
-  cwd "#{node['dev']['global_user_home']}"
-  code "rpm -ivh  Disk1/#{node['dev']['express_package']} > /xe_logs/XEsilentinstall.log"
-  action :run
-  user node['dev']['global_user']
-end
-=end
-
+# install Oracle Database XE from .deb file
 dpkg_package "#{node['dev']['global_user_home']}/Disk1/#{node['dev']['express_package']}.deb" do
   action :install
 end
+=end
 
-# install Oracle Database XE
-bash "install_express2" do
+# configure Oracle Database XE
+bash "configure-express" do
   cwd "#{node['dev']['global_user_home']}"
   code "/etc/init.d/oracle-xe configure responseFile=#{node['dev']['express_response_file']} >> /xe_logs/XEsilentinstall.log"
   action :run
