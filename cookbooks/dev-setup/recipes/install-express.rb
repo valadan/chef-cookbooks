@@ -88,15 +88,19 @@ directory "/xe_logs" do
 end
 
 # install Oracle Database XE
-bash "install_express" do
+bash "install_express1" do
   cwd "#{node['dev']['global_user_home']}"
-  code <<-EOH
-    rpm -ivh  #{node['dev']['express_package']} > /xe_logs/XEsilentinstall.log
-    /etc/init.d/oracle-xe configure responseFile=#{node['dev']['express_response_file']} >> /xe_logs/XEsilentinstall.log
-    EOH
+  code "rpm -ivh  #{node['dev']['express_package']} > /xe_logs/XEsilentinstall.log"
   action :run
   user node['dev']['global_user']
-  group node['dev']['global_group']
+end
+
+# install Oracle Database XE
+bash "install_express2" do
+  cwd "#{node['dev']['global_user_home']}"
+  code "/etc/init.d/oracle-xe configure responseFile=#{node['dev']['express_response_file']} >> /xe_logs/XEsilentinstall.log"
+  action :run
+  user node['dev']['global_user']
 end
 
 # set Oracle Database XE environment variables
@@ -105,13 +109,11 @@ bash "set_express_env_vars" do
   code ". ./oracle_env.sh"
   action :run
   user node['dev']['global_user']
-  group node['dev']['global_group']
 end
 
 # environment variables are set properly each time you log in or open a new shell
 bash "bash-login" do
-  code "echo '. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh' > #{node['dev']['global_user_home']}/.bashrc"
+  code "echo '. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh' >> #{node['dev']['global_user_home']}/.bashrc"
   user node['dev']['global_user']
-  group node['dev']['global_group']
   action :run
 end
