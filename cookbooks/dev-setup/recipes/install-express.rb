@@ -47,11 +47,11 @@ apt_package "unzip" do
   action :install
 end
 
-apt_package "glibc" do
+apt_package "alien" do
   action :install
 end
 
-apt_package "libaio" do
+apt_package "libaio1" do
   action :install
 end
 
@@ -60,6 +60,15 @@ bash "unzip-express" do
   cwd "#{node['dev']['global_user_home']}"
   code "unzip -o #{node['dev']['express_package']}.zip"
   user node['dev']['global_user']
+  action :run
+end
+
+# covert to .deb
+bash "convert-rpm" do
+  cwd "#{node['dev']['global_user_home']}/Disk1"
+  code "alien --to-deb --scripts #{node['dev']['express_package']}.zip"
+  user node['dev']['global_user']
+  creates "#{node['dev']['express_package']}.deb"
   action :run
 end
 
@@ -78,11 +87,11 @@ bash "create_response_file" do
   cwd "#{node['dev']['global_user_home']}"
   code <<-EOH
     echo \
-    "ORACLE_LISTENER_PORT=#{node['dev']['express_listen_port']}\n \
-    ORACLE_HTTP_PORT=#{node['dev']['express_http_port']}\n \
-    ORACLE_PASSWORD=#{node['dev']['express_password']}\n \
-    ORACLE_CONFIRM_PASSWORD=#{node['dev']['express_password']}\n \
-    ORACLE_DBENABLE=y" \
+    "ORACLE_LISTENER_PORT=#{node['dev']['express_listen_port']} \
+    \nORACLE_HTTP_PORT=#{node['dev']['express_http_port']} \
+    \nORACLE_PASSWORD=#{node['dev']['express_password']} \
+    \nORACLE_CONFIRM_PASSWORD=#{node['dev']['express_password']} \
+    \nORACLE_DBENABLE=y" \
     > #{node['dev']['express_response_file']}
     EOH
   action :run
@@ -95,12 +104,18 @@ directory "/xe_logs" do
   action :create
 end
 
+=begin
 # install Oracle Database XE
 bash "install_express1" do
   cwd "#{node['dev']['global_user_home']}"
   code "rpm -ivh  Disk1/#{node['dev']['express_package']} > /xe_logs/XEsilentinstall.log"
   action :run
   user node['dev']['global_user']
+end
+=end
+
+dpkg_package "#{node['dev']['global_user_home']}/Disk1/#{node['dev']['express_package']}.deb" do
+  action :install
 end
 
 # install Oracle Database XE
