@@ -32,14 +32,20 @@ remote_file "copy-express-to-home" do
   #not_if { ::File.exists?(wl_home_tmp) }
 end
 
-# unzip Oracle Database XE package
+# install unzip
 bash "unzip-express" do
-  cwd "#{node['dev']['global_user_home']}"
-  code "/usr/bin/unzip -o #{node['dev']['express_package']}.rpm.zip"
+  code "sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get install unzip -y"
   user node['dev']['global_user']
   action :run
 end
 
+# unzip Oracle Database XE package
+bash "unzip-express" do
+  cwd "#{node['dev']['global_user_home']}"
+  code "unzip -o #{node['dev']['express_package']}.rpm.zip"
+  user node['dev']['global_user']
+  action :run
+end
 
 =begin
 # copy static response file to home directory

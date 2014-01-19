@@ -44,8 +44,8 @@
 # WLS Domain/Server install settings
   default['dev']['wls_domain']              = 'development'
   default['dev']['wls_server']              = 'applications'
-  default['dev']['wls_username']            = 'oracle'
-  default['dev']['wls_password']            = 'weblogic'
+  default['dev']['wls_username']            = 'weblogic'
+  default['dev']['wls_password']            = 'weblogic1'
   default['dev']['wls_port']                = 7709
 
 # Database Express Edition install settings
@@ -54,4 +54,4 @@
   default['dev']['express_response_file']   = 'xe.rsp'
   default['dev']['express_listen_port']     = 1521
   default['dev']['express_http_port']       = 8380
-  default['dev']['express_password']        = 'express'
+  default['dev']['express_password']        = 'express1'

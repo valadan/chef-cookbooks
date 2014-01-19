@@ -48,7 +48,6 @@ end
 # installer asks to create? y/n?
 bash 'create-domain' do
   cwd "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains"
-  timeout 180
   code <<-EOF
     echo 'Y' | java \
     -XX:MaxPermSize=1048m -Xms512m -Xmx1024m \
@@ -66,6 +65,16 @@ bash 'create-domain' do
   action :run
 end
 
+bash 'stop-domain' do
+  cwd "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains/bin/"
+  code "java -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server"
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+  only_if { ::File.exists?(domains_home_tmp) }
+  action :run
+end
+
+=begin
 bash 'enable-tunneling' do
   cwd "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains/config"
   code "sed -i 's/<tunneling-enabled>false/<tunneling-enabled>true/g' config.xml"
@@ -74,7 +83,6 @@ bash 'enable-tunneling' do
   action :run
 end
 
-# this works, but if you run it, provisioning never stops running, since domain is running.
 # need a better alternative, like create a shell script that can be called after provisioning.
 bash 'start-domain' do
   cwd "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains"
@@ -88,5 +96,6 @@ bash 'start-domain' do
   user node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?(domains_home_tmp) }
-  action :run
+  action :nothing
 end
+=end
