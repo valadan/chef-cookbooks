@@ -19,8 +19,8 @@
 
 # General settings
   default['dev']['global_sync_folder']      = 'artifacts'
-  default['dev']['global_user']             = 'vagrant'
-  default['dev']['global_group']            = 'vagrant'
+  default['dev']['global_user']             = 'oracle'
+  default['dev']['global_group']            = 'oracle'
   default['dev']['global_user_home']        = "/home/#{default['dev']['global_user']}"
 
 # JDK install settings
@@ -44,7 +44,7 @@
 # WLS Domain/Server install settings
   default['dev']['wls_domain']              = 'development'
   default['dev']['wls_server']              = 'applications'
-  default['dev']['wls_username']            = 'weblogic'
+  default['dev']['wls_username']            = 'oracle'
   default['dev']['wls_password']            = 'weblogic'
   default['dev']['wls_port']                = 7709
 
