@@ -126,7 +126,6 @@ bash "configure-express" do
   cwd "#{node['dev']['global_user_home']}"
   code "/etc/init.d/oracle-xe configure responseFile=#{node['dev']['express_response_file']} >> /xe_logs/XEsilentinstall.log"
   action :run
-  user node['dev']['global_user']
 end
 
 # set Oracle Database XE environment variables
