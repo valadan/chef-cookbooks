@@ -90,7 +90,7 @@ end
 # install Oracle Database XE
 bash "install_express1" do
   cwd "#{node['dev']['global_user_home']}"
-  code "rpm -ivh  #{node['dev']['express_package']} > /xe_logs/XEsilentinstall.log"
+  code "rpm -ivh  Disk1/#{node['dev']['express_package']}.rpm > /xe_logs/XEsilentinstall.log"
   action :run
   user node['dev']['global_user']
 end
