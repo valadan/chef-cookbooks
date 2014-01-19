@@ -1,7 +1,7 @@
 Vagrant Chef Oracle Project
 ---------------------------
 
-Cookbook Project to create an Oracle/Java Development VM with all applications other than an IDE, to build and test Java EE projects.
+Vagrant Project to create an 64-bit Ubuntu Server-based Oracle/Java Development VM with all applications other than an IDE, to build and test Java EE projects.
 
 <h4>Major Components</h4>
 * Oracle JDK 1.7.0_45-b18 64-bit and all alternatives
@@ -41,7 +41,5 @@ Cookbook Project to create an Oracle/Java Development VM with all applications o
 * *[oracle-xe-11.2.0-1.0.x86_64.rpm.zip] (http://www.oracle.com/technetwork/database/database-technologies/express-edition/downloads/index.html)*
 
 <h4>Ubuntu Cloud Image Used to Create VM</h4>
-Preferred:
-* *[Ubuntu Server 13.10 (Saucy Salamander) 64-bit daily build] (http://cloud-images.ubuntu.com/vagrant/saucy/current/saucy-server-cloudimg-amd64-vagrant-disk1.box)
-Alternate:
-* *[Ubuntu Server 12.04 LTS (Precise Pangolin) 64-bit daily build] (http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box)*
+* *[Preferred: Ubuntu Server 13.10 (Saucy Salamander) 64-bit daily build] (http://cloud-images.ubuntu.com/vagrant/saucy/current/saucy-server-cloudimg-amd64-vagrant-disk1.box)*
+* *[Alternate: Ubuntu Server 12.04 LTS (Precise Pangolin) 64-bit daily build] (http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box)*
