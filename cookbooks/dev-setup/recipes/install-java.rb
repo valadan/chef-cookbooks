@@ -20,7 +20,8 @@
 remote_file "copy-jdk-to-home" do 
   path "#{node['dev']['global_user_home']}/#{node['dev']['java_jdk_package']}" 
   source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['java_jdk_package']}"
-  checksum node['dev']['java_jdk_pkg_checksum']
+  not_if { ::File.exists?("#{node['dev']['global_user_home']}/#{node['dev']['java_jdk_package']}") }
+  #checksum node['dev']['java_jdk_pkg_checksum']
   owner node['dev']['global_user']
   group node['dev']['global_group']
   mode 0755
