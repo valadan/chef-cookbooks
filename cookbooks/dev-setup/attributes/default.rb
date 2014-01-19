@@ -19,8 +19,8 @@
 
 # General settings
   default['dev']['global_sync_folder']      = 'artifacts'
-  default['dev']['global_user']             = 'oracle'
-  default['dev']['global_group']            = 'oracle'
+  default['dev']['global_user']             = 'vagrant'
+  default['dev']['global_group']            = 'vagrant'
   default['dev']['global_user_home']        = "/home/#{default['dev']['global_user']}"
 
 # JDK install settings
@@ -53,5 +53,5 @@
   default['dev']['express_pkg_checksum']    = 'b5039fad2e4f92c68778dcabbd0b4622a6cb025f25f7d6222f9e9de53ebab531'
   default['dev']['express_response_file']   = 'xe.rsp'
   default['dev']['express_listen_port']     = 1521
-  default['dev']['express_http_port']       = 8080
+  default['dev']['express_http_port']       = 8380
   default['dev']['express_password']        = 'express'

@@ -17,6 +17,10 @@
 # limitations under the License.
 #
 
+# referece links:
+# http://docs.oracle.com/cd/E17781_01/install.112/e18802/toc.htm#BABCEAHD
+# http://docs.oracle.com/cd/E17781_01/install.112/e18802/toc.htm
+
 # copy zipped Oracle Database XE package to home directory
 remote_file "copy-express-to-home" do 
   path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.rpm.zip" 
