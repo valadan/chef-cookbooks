@@ -23,13 +23,13 @@
 
 # copy zipped Oracle Database XE package to home directory
 remote_file "copy-express-to-home" do 
-  path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.rpm.zip" 
-  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.rpm.zip"
+  path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip" 
+  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.zip"
   checksum node['dev']['wls_pkg_checksum']
   owner node['dev']['global_user']
   group node['dev']['global_group']
   mode 0755
-  not_if { ::File.exists?("#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.rpm.zip") }
+  not_if { ::File.exists?("#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip") }
 end
 
 # apt update/upgrade
@@ -47,10 +47,18 @@ apt_package "unzip" do
   action :install
 end
 
+apt_package "glibc" do
+  action :install
+end
+
+apt_package "libaio" do
+  action :install
+end
+
 # unzip Oracle Database XE package
 bash "unzip-express" do
   cwd "#{node['dev']['global_user_home']}"
-  code "unzip -o #{node['dev']['express_package']}.rpm.zip"
+  code "unzip -o #{node['dev']['express_package']}.zip"
   user node['dev']['global_user']
   action :run
 end
@@ -90,7 +98,7 @@ end
 # install Oracle Database XE
 bash "install_express1" do
   cwd "#{node['dev']['global_user_home']}"
-  code "rpm -ivh  Disk1/#{node['dev']['express_package']}.rpm > /xe_logs/XEsilentinstall.log"
+  code "rpm -ivh  Disk1/#{node['dev']['express_package']} > /xe_logs/XEsilentinstall.log"
   action :run
   user node['dev']['global_user']
 end
