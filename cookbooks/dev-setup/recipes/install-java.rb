@@ -31,7 +31,7 @@ end
 bash "make_jvm_dir" do
   code <<-EOH
     sudo mkdir /usr/lib/jvm
-    sudo chmod +x $libraries/jvm
+    sudo chmod +x /usr/lib/jvm
   EOH
   action :run
   not_if { ::File.exists?("/usr/lib/jvm") }
