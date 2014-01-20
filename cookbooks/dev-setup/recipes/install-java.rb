@@ -27,6 +27,26 @@ remote_file "copy-jdk-to-home" do
   mode 0755
 end
 
+# make jvm directory
+bash "make_jvm_dir" do
+  code <<-EOH
+    sudo mkdir /usr/lib/jvm
+    sudo chmod +x $libraries/jvm
+  EOH
+  action :run
+  not_if { ::File.exists?("/usr/lib/jvm") }
+end
+
+# untar JDK package
+bash "unzip-express" do
+  cwd "#{Chef::Config[:file_cache_path]}"
+  #cwd "#{node['dev']['global_user_home']}"
+  code "sudo tar -zxf #{Chef::Config[:file_cache_path]}/#{node['dev']['java_jdk_package']} -C /usr/lib/jvm"
+  #user node['dev']['global_user']
+  action :run
+  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/#{node['dev']['express_package']}.rpm") }
+end
+
 cookbook_file "#{Chef::Config[:file_cache_path]}/#{node['dev']['java_install_jdk']}" do
   source node['dev']['java_install_jdk']
   #owner node['dev']['global_user']

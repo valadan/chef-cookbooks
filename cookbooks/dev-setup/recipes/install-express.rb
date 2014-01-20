@@ -78,6 +78,7 @@ bash "misc_commands" do
     sudo mkdir /var/lock/subsys
   EOH
   action :run
+  not_if { ::File.exists?("/var/lock/subsys") }
 end
 
 

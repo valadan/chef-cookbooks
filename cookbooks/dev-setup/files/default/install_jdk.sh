@@ -10,9 +10,9 @@
 
 ########## variables start ########## 
 
-# Vagrant VM User - not best solution.
-# Need to research better solution!
-vm_user=vagrant
+## Vagrant VM User - not best solution.
+## Need to research better solution!
+#vm_user=vagrant
 
 # priority value
 priority=20000
@@ -26,26 +26,26 @@ libraries=/usr/lib
 # path to new java version
 javapath=$libraries/jvm/jdk1.7.0_45
 
-# path to downloaded java version
-java_download=/home/$vm_user/jdk-7u45-linux-x64.tar.gz
+## path to downloaded java version
+#java_download=/home/$vm_user/jdk-7u45-linux-x64.tar.gz
 
 ########## variables end ########## 
 
-cd $libraries
-[ -d jvm ] || sudo mkdir jvm
-cd /home/$vm_user/
+#cd $libraries
+#[ -d jvm ] || sudo mkdir jvm
+#cd /home/$vm_user/
 
-# change permissions on jvm subdirectory
-sudo chmod +x $libraries/jvm/
+## change permissions on jvm subdirectory
+#sudo chmod +x $libraries/jvm/
 
-# extract new version of java from the downloaded tarball
-if [ -f $java_download ]; then
-	sudo tar -zxf $java_download -C $libraries/jvm
-else
-	echo "Cannot locate Java download. Check 'java_download' variable."
-	echo 'Exiting script.'
-	exit 1
-fi
+## extract new version of java from the downloaded tarball
+#if [ -f $java_download ]; then
+#	sudo tar -zxf $java_download -C $libraries/jvm
+#else
+#	echo "Cannot locate Java download. Check 'java_download' variable."
+#	echo 'Exiting script.'
+#	exit 1
+#fi
 
 # install and config java web start (java)
 sudo update-alternatives --install $binaries/java java \
