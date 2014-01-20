@@ -111,40 +111,40 @@ bash "misc_commands" do
   not_if { ::File.exists?("/sbin/chkconfig") }
 end
 
-# copy zipped Oracle Database XE package to home directory
+# copy zipped Oracle Database XE package to tmp directory
 remote_file "copy-express-to-home" do 
-  path "#{Chef::Config[:file_cache_path]}/#{node['dev']['express_package']}.rpm.zip"
-  #path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.rpm.zip" 
-  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.rpm.zip"
+  path "#{Chef::Config[:file_cache_path]}/#{node['dev']['express_package']}.zip"
+  #path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip" 
+  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.zip"
   checksum node['dev']['wls_pkg_checksum']
   #owner node['dev']['global_user']
   #group node['dev']['global_group']
   mode 0755
-  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/#{node['dev']['express_package']}.rpm.zip") }
+  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/#{node['dev']['express_package']}.zip") }
 end
 
 # unzip Oracle Database XE package
 bash "unzip-express" do
   cwd "#{Chef::Config[:file_cache_path]}"
   #cwd "#{node['dev']['global_user_home']}"
-  code "unzip -o #{node['dev']['express_package']}.rpm.zip"
+  code "unzip -o #{node['dev']['express_package']}.zip"
   #user node['dev']['global_user']
   action :run
-  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/#{node['dev']['express_package']}.rpm") }
+  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/#{node['dev']['express_package']}") }
 end
 
 # covert to .deb with alien for Ubuntu
 bash "convert-rpm" do
   cwd "#{Chef::Config[:file_cache_path]}/Disk1"
   #cwd "#{node['dev']['global_user_home']}/Disk1"
-  code "alien --to-deb --scripts #{node['dev']['express_package']}.rpm"
-  creates "#{node['dev']['express_package']}.deb"
+  code "alien --to-deb --scripts #{node['dev']['express_package']}"
+  creates "#{node['dev']['express_package_deb']}"
   action :run
-  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/#{node['dev']['express_package']}.deb") }
+  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/#{node['dev']['express_package_deb']}") }
 end
 
 =begin
-# copy static response file to home directory
+# copy static response file to tmp directory
 cookbook_file "#{node['dev']['global_user_home']}/#{node['dev']['express_response_file']}" do
   source node['dev']['express_response_file']
   owner node['dev']['global_user']
@@ -155,7 +155,7 @@ end
 
 # create response file dynamically
 bash "create_response_file" do
-  cwd "#{Chef::Config[:file_cache_path]}/Disk1"
+  cwd "#{Chef::Config[:file_cache_path]}/Disk1/response"
   #cwd "#{node['dev']['global_user_home']}"
   code <<-EOH
     echo \
@@ -184,19 +184,12 @@ bash "install_express" do
   cwd "#{Chef::Config[:file_cache_path]}/Disk1"
   #cwd "#{node['dev']['global_user_home']}/Disk1"
   code <<-EOH
-    sudo dpkg --install #{node['dev']['express_package']}.deb \
+    sudo dpkg --install #{node['dev']['express_package_deb']} \
     > /tmp/XEsilentinstall.log
   EOH
   action :run
   not_if { ::File.exists?("/etc/init.d/oracle-xe") }
 end
-
-=begin
-# install Oracle Database XE from .deb file
-dpkg_package "#{node['dev']['global_user_home']}/Disk1/#{node['dev']['express_package']}.deb" do
-  action :install
-end
-=end
 
 # configure Oracle Database XE
 bash "configure-express" do
@@ -204,7 +197,7 @@ bash "configure-express" do
   #cwd "#{node['dev']['global_user_home']}"
   code <<-EOH
     /etc/init.d/oracle-xe configure \
-    responseFile=#{node['dev']['express_response_file']} \
+    responseFile="#{Chef::Config[:file_cache_path]}/Disk1/response/#{node['dev']['express_response_file']}" \
     >> /tmp/XEsilentinstall.log
   EOH
   action :run
