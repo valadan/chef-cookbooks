@@ -27,7 +27,7 @@ bash "apt-update" do
   action :run
 end
 
-apt_package "rpm" do
+apt_package "unixodbc" do
   action :install
 end
 
@@ -43,33 +43,103 @@ apt_package "libaio1" do
   action :install
 end
 
+# create kernel parameters
+bash "create_kernel_params" do
+  code <<-EOH
+    cat > /etc/sysctl.d/60-oracle.conf <<-EOF
+    # Oracle 11g XE kernel parameters
+    fs.file-max=6815744
+    net.ipv4.ip_local_port_range=9000 65500
+    kernel.sem=250 32000 100 128
+    # kernel.shmmax=429496729
+    kernel.shmmax=107374183
+    EOF
+  EOH
+  action :run
+  not_if { ::File.exists?("/etc/sysctl.d/60-oracle.conf") }
+end
+
+# load and verify the new kernel parameters
+bash "load_kernel_params" do
+  code <<-EOH
+    service procps start
+    sudo sysctl -q fs.file-max
+    sudo sysctl -q kernel.shmmax
+    sudo sysctl -q net.ipv4.ip_local_port_range
+    sudo sysctl -q kernel.sem 
+  EOH
+  action :run
+end
+
+# misc commands
+bash "misc_commands" do
+  code <<-EOH
+    sudo ln -s /usr/bin/awk /bin/awk
+    sudo mkdir /var/lock/subsys
+  EOH
+  action :run
+end
+
+
+# misc commands
+bash "misc_commands" do
+  code <<-EOH
+    cat > /sbin/chkconfig <<-EOF
+    #!/bin/bash
+    # Oracle 11gR2 XE installer chkconfig hack for Debian based Linux (by dude)
+    # Only run once.
+    echo "Simulating /sbin/chkconfig..."
+    if [[ ! \`tail -n1 /etc/init.d/oracle-xe | grep INIT\` ]]; then
+    cat >> /etc/init.d/oracle-xe <<-EOM
+    #
+    ### BEGIN INIT INFO
+    # Provides:              OracleXE
+    # Required-Start:        \\\$remote_fs \\\$syslog
+    # Required-Stop:         \\\$remote_fs \\\$syslog
+    # Default-Start:         2 3 4 5
+    # Default-Stop:          0 1 6
+    # Short-Description:     Oracle 11g Express Edition
+    ### END INIT INFO
+    EOM
+    fi
+    update-rc.d oracle-xe defaults 80 01
+    EOF
+    sudo chmod 755 /sbin/chkconfig
+  EOH
+  action :run
+  not_if { ::File.exists?("/sbin/chkconfig") }
+end
+
 # copy zipped Oracle Database XE package to home directory
 remote_file "copy-express-to-home" do 
-  path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip" 
-  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.zip"
+  path "#{Chef::Config[:file_cache_path]}/#{node['dev']['express_package']}.rpm.zip"
+  #path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.rpm.zip" 
+  source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.rpm.zip"
   checksum node['dev']['wls_pkg_checksum']
-  owner node['dev']['global_user']
-  group node['dev']['global_group']
+  #owner node['dev']['global_user']
+  #group node['dev']['global_group']
   mode 0755
-  not_if { ::File.exists?("#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip") }
+  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/#{node['dev']['express_package']}.rpm.zip") }
 end
 
 # unzip Oracle Database XE package
 bash "unzip-express" do
-  cwd "#{node['dev']['global_user_home']}"
-  code "unzip -o #{node['dev']['express_package']}.zip"
-  user node['dev']['global_user']
+  cwd "#{Chef::Config[:file_cache_path]}"
+  #cwd "#{node['dev']['global_user_home']}"
+  code "unzip -o #{node['dev']['express_package']}.rpm.zip"
+  #user node['dev']['global_user']
   action :run
-  not_if { ::File.exists?("#{node['dev']['global_user_home']}/Disk1/#{node['dev']['express_package']}") }
+  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/#{node['dev']['express_package']}.rpm") }
 end
 
 # covert to .deb with alien for Ubuntu
 bash "convert-rpm" do
-  cwd "#{node['dev']['global_user_home']}/Disk1"
-  code "alien --to-deb --scripts #{node['dev']['express_package']}"
+  cwd "#{Chef::Config[:file_cache_path]}/Disk1"
+  #cwd "#{node['dev']['global_user_home']}/Disk1"
+  code "alien --to-deb --scripts #{node['dev']['express_package']}.rpm"
   creates "#{node['dev']['express_package']}.deb"
   action :run
-  not_if { ::File.exists?("#{node['dev']['global_user_home']}/Disk1/#{node['dev']['express_package']}.deb") }
+  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/#{node['dev']['express_package']}.deb") }
 end
 
 =begin
@@ -84,33 +154,39 @@ end
 
 # create response file dynamically
 bash "create_response_file" do
-  cwd "#{node['dev']['global_user_home']}"
+  cwd "#{Chef::Config[:file_cache_path]}/Disk1"
+  #cwd "#{node['dev']['global_user_home']}"
   code <<-EOH
     echo \
     "ORACLE_LISTENER_PORT=#{node['dev']['express_listen_port']} \
-    \nORACLE_HTTP_PORT=#{node['dev']['express_http_port']} \
-    \nORACLE_PASSWORD=#{node['dev']['express_password']} \
-    \nORACLE_CONFIRM_PASSWORD=#{node['dev']['express_password']} \
-    \nORACLE_DBENABLE=y" \
+    ORACLE_HTTP_PORT=#{node['dev']['express_http_port']} \
+    ORACLE_PASSWORD=#{node['dev']['express_password']} \
+    ORACLE_CONFIRM_PASSWORD=#{node['dev']['express_password']} \
+    ORACLE_DBENABLE=y" \
     > #{node['dev']['express_response_file']}
-    EOH
+  EOH
   action :run
-  user node['dev']['global_user']
-  group node['dev']['global_group']
+  #user node['dev']['global_user']
+  #group node['dev']['global_group']
 end
 
+=begin
 directory "/xe_logs" do
   mode 0777
   action :create
   not_if { ::File.exists?("/xe_logs") }
 end
+=end
 
 # install Oracle Database XE
 bash "install_express" do
-  cwd "#{node['dev']['global_user_home']}/Disk1"
-  code "sudo dpkg --install #{node['dev']['express_package']} > /xe_logs/XEsilentinstall.log"
+  cwd "#{Chef::Config[:file_cache_path]}/Disk1"
+  #cwd "#{node['dev']['global_user_home']}/Disk1"
+  code <<-EOH
+    sudo dpkg --install #{node['dev']['express_package']}.deb \
+    > /tmp/XEsilentinstall.log
+  EOH
   action :run
-  user node['dev']['global_user']
   not_if { ::File.exists?("/etc/init.d/oracle-xe") }
 end
 
@@ -123,8 +199,13 @@ end
 
 # configure Oracle Database XE
 bash "configure-express" do
-  cwd "#{node['dev']['global_user_home']}"
-  code "/etc/init.d/oracle-xe configure responseFile=#{node['dev']['express_response_file']} >> /xe_logs/XEsilentinstall.log"
+  cwd "#{Chef::Config[:file_cache_path]}/Disk1"
+  #cwd "#{node['dev']['global_user_home']}"
+  code <<-EOH
+    /etc/init.d/oracle-xe configure \
+    responseFile=#{node['dev']['express_response_file']} \
+    >> /tmp/XEsilentinstall.log
+  EOH
   action :run
 end
 
@@ -138,7 +219,10 @@ end
 
 # environment variables are set properly each time you log in or open a new shell
 bash "bash-login" do
-  code "echo '. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh' >> #{node['dev']['global_user_home']}/.bashrc"
+code <<-EOH
+  echo '. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh' \
+  >> #{node['dev']['global_user_home']}/.bashrc
+EOH
   user node['dev']['global_user']
   action :run
 end

@@ -32,7 +32,7 @@
   
 # Swapfile settings
   default['dev']['swap_create']             = 'create_swapfile.sh'
-  default['dev']['swap_size_mb']            = '1024'
+  default['dev']['swap_size_mb']            = '2048'
   default['dev']['swap_remove']             = 'remove_swapfile.sh'
 
 # WLS install settings
@@ -49,7 +49,7 @@
   default['dev']['wls_port']                = 7709
 
 # Database Express Edition install settings
-  default['dev']['express_package']         = 'oracle-xe-11.2.0-1.0.x86_64.rpm'
+  default['dev']['express_package']         = 'oracle-xe-11.2.0-1.0.x86_64'
   default['dev']['express_pkg_checksum']    = 'b5039fad2e4f92c68778dcabbd0b4622a6cb025f25f7d6222f9e9de53ebab531'
   default['dev']['express_response_file']   = 'xe.rsp'
   default['dev']['express_listen_port']     = 1521
