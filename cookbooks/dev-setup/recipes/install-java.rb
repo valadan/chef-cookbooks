@@ -18,35 +18,35 @@
 #
 
 remote_file "copy-jdk-to-home" do 
-  path "#{node['dev']['global_user_home']}/#{node['dev']['java_jdk_package']}" 
+  path "#{Chef::Config[:file_cache_path]}/#{node['dev']['java_jdk_package']}" 
   source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['java_jdk_package']}"
-  not_if { ::File.exists?("#{node['dev']['global_user_home']}/#{node['dev']['java_jdk_package']}") }
-  #checksum node['dev']['java_jdk_pkg_checksum']
-  owner node['dev']['global_user']
-  group node['dev']['global_group']
+  #not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/#{node['dev']['java_jdk_package']}") }
+  checksum node['dev']['java_jdk_pkg_checksum']
+  #owner node['dev']['global_user']
+  #group node['dev']['global_group']
   mode 0755
 end
 
-cookbook_file "#{node['dev']['global_user_home']}/#{node['dev']['java_install_jdk']}" do
+cookbook_file "#{Chef::Config[:file_cache_path]}/#{node['dev']['java_install_jdk']}" do
   source node['dev']['java_install_jdk']
-  owner node['dev']['global_user']
-  group node['dev']['global_group']
+  #owner node['dev']['global_user']
+  #group node['dev']['global_group']
   mode 0755
 end
 
 bash "install-java" do
-  code "sh #{node['dev']['global_user_home']}/#{node['dev']['java_install_jdk']}"
-  user node['dev']['global_user']
+  code "sh #{Chef::Config[:file_cache_path]}/#{node['dev']['java_install_jdk']}"
+  #user node['dev']['global_user']
   action :run
   not_if { ::File.exists?("/usr/lib/jvm/jdk1.7.0_45/bin/java") }
 end
 
 =begin
-file "#{node['dev']['global_user_home']}/#{node['dev']['java_jdk_package']}" do 
+file "#{Chef::Config[:file_cache_path]}/#{node['dev']['java_jdk_package']}" do 
   action :delete
 end
 
-file "#{node['dev']['global_user_home']}/#{node['dev']['java_install_jdk']}" do 
+file "#{Chef::Config[:file_cache_path]}/#{node['dev']['java_install_jdk']}" do 
   action :delete
 end
 =end
