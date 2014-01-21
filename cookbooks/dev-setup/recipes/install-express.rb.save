@@ -27,11 +27,26 @@ bash "apt-update" do
   action :run
 end
 
-# install required packages
-%w{unixodbc unzip alien libaio1}.each do |pkg|
+%w{erlang-base erlang-corba erlang-crypto rabbitmq-server}.each do |pkg|
   package pkg do
     action :upgrade
   end
+end
+
+"unixodbc"apt_package "unixodbc" do
+  action :install
+end
+
+apt_package "unzip" do
+  action :install
+end
+
+apt_package "alien" do
+  action :install
+end
+
+apt_package "libaio1" do
+  action :install
 end
 
 # create kernel parameters
@@ -147,13 +162,15 @@ end
 # create response file dynamically
 bash "create_response_file" do
   cwd "#{Chef::Config[:file_cache_path]}/Disk1/response"
-  #cwd node['dev']['global_user_home']
+  #cwd "#{node['dev']['global_user_home']}"
   code <<-EOH
-    echo "ORACLE_LISTENER_PORT=#{node['dev']['express_listen_port']}
-ORACLE_HTTP_PORT=#{node['dev']['express_http_port']}
-ORACLE_PASSWORD=#{node['dev']['express_password']}
-ORACLE_CONFIRM_PASSWORD=#{node['dev']['express_password']}
-ORACLE_DBENABLE=y" > #{node['dev']['express_response_file']}
+    echo \
+    "ORACLE_LISTENER_PORT=#{node['dev']['express_listen_port']}\n\r \ 
+ORACLE_HTTP_PORT=#{node['dev']['express_http_port']}\n\r \
+ORACLE_PASSWORD=#{node['dev']['express_password']}\n\r \
+ORACLE_CONFIRM_PASSWORD=#{node['dev']['express_password']}\n\r \
+ORACLE_DBENABLE=y" \
+    > #{node['dev']['express_response_file']}
   EOH
   action :run
   #user node['dev']['global_user']
@@ -167,65 +184,6 @@ directory "/xe_logs" do
   not_if { ::File.exists?("/xe_logs") }
 end
 =end
-
-# create shared memory
-bash "shared_memory" do
-  code <<-EOH
-    cat > /etc/init.d/oracle-shm <<-EOF
-    #! /bin/sh
-    # /etc/init.d/oracle-shm
-    #
-    #
-    case "\$1" in
-      start)
-        echo "Starting script /etc/init.d/oracle-shm"
-        # Run only once at system startup
-        if [ -e /dev/shm/.oracle-shm ]; then
-          echo "/dev/shm is already mounted, nothing to do"
-        else
-          rm -f /dev/shm
-          mkdir /dev/shm
-          mount -B /run/shm /dev/shm
-          touch /dev/shm/.oracle-shm
-        fi
-        ;;
-      stop)
-        echo "Stopping script /etc/init.d/oracle-shm"
-        echo "Nothing to do"
-        ;;
-      *)
-        echo "Usage: /etc/init.d/oracle-shm {start|stop}"
-        exit 1
-        ;;
-    esac
-    #
-    ### BEGIN INIT INFO
-    # Provides:          oracle-shm
-    # Required-Start:    $remote_fs $syslog
-    # Required-Stop:     $remote_fs $syslog
-    # Default-Start:     2 3 4 5
-    # Default-Stop:      0 1 6 
-    # Short-Description: Bind /run/shm to /dev/shm at system startup.
-    # Description:       Fix to allow Oracle 11g use AMM.
-    ### END INIT INFO
-    EOF
-  EOH
-  action :run
-  not_if { ::File.exists?("/dev/shm/.oracle-shm") }
-end
-
-# configure shared memory
-bash "shared_memory_config" do
-  code <<-EOH
-    chmod 755 /etc/init.d/oracle-shm
-    update-rc.d oracle-shm defaults 01 99
-    sudo cat /etc/mtab | grep shm
-    none /run/shm tmpfs rw,nosuid,nodev 0 0
-    /run/shm /dev/shm none rw,bind 0 0
-  EOH
-  action :run
-  not_if { ::File.exists?("/dev/shm/.oracle-shm") }
-end
 
 # install Oracle Database XE
 bash "install_express" do
@@ -241,11 +199,13 @@ end
 
 # configure Oracle Database XE
 bash "configure-express" do
-  #cwd "#{Chef::Config[:file_cache_path]}/Disk1"
+  cwd "#{Chef::Config[:file_cache_path]}/Disk1"
   #cwd "#{node['dev']['global_user_home']}"
-  code "sudo /etc/init.d/oracle-xe configure \
-    responseFile=#{Chef::Config[:file_cache_path]}/Disk1/response/#{node['dev']['express_response_file']} \
-    >> /tmp/XEsilentinstall.log"
+  code <<-EOH
+    sudo /etc/init.d/oracle-xe configure \
+    responseFile="#{Chef::Config[:file_cache_path]}/Disk1/response/#{node['dev']['express_response_file']}" \
+    >> /tmp/XEsilentinstall.log
+  EOH
   action :run
 end
 
@@ -259,8 +219,10 @@ end
 
 # environment variables are set properly each time you log in or open a new shell
 bash "bash-login" do
-  code "echo '. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh' \
-    >> #{node['dev']['global_user_home']}/.bashrc"
+code <<-EOH
+  echo '. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh' \
+  >> #{node['dev']['global_user_home']}/.bashrc
+EOH
   user node['dev']['global_user']
   action :run
 end

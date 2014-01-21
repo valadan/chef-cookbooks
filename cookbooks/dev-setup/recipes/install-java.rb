@@ -38,13 +38,13 @@ bash "make_jvm_dir" do
 end
 
 # untar JDK package
-bash "unzip-express" do
-  cwd "#{Chef::Config[:file_cache_path]}"
+bash "untar-jdk" do
+  cwd Chef::Config[:file_cache_path]
   #cwd "#{node['dev']['global_user_home']}"
   code "sudo tar -zxf #{Chef::Config[:file_cache_path]}/#{node['dev']['java_jdk_package']} -C /usr/lib/jvm"
   #user node['dev']['global_user']
   action :run
-  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/#{node['dev']['express_package']}.rpm") }
+  not_if { ::File.exists?("/usr/lib/jvm/jdk1.7.0_45/bin/java") }
 end
 
 cookbook_file "#{Chef::Config[:file_cache_path]}/#{node['dev']['java_install_jdk']}" do
