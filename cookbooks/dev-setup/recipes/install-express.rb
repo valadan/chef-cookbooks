@@ -130,7 +130,7 @@ end
 
 
 # copy zipped Oracle Database XE package to tmp directory
-remote_file "copy-express-to-home" do 
+remote_file "copy-express-to-cache" do 
   path "#{Chef::Config[:file_cache_path]}/#{node['dev']['express_package']}.zip"
   #path "#{node['dev']['global_user_home']}/#{node['dev']['express_package']}.zip" 
   source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['express_package']}.zip"
@@ -195,7 +195,7 @@ directory "/xe_logs" do
 end
 =end
 
-=begin
+
 # create shared memory
 bash "shared_memory" do
   code <<-EOH
@@ -213,7 +213,17 @@ bash "shared_memory" do
         else
           rm -f /dev/shm
           mkdir /dev/shm
-          mount -B /run/shm /dev/shm
+
+          # orginal method
+          #mount -B /run/shm /dev/shm
+
+          # alternative 2
+          #mount --move /run/shm /dev/shm
+          #mount -B /dev/shm /run/shm
+
+          # alternaitve 3
+          mount -t tmpfs shmfs -o size=2048m /dev/shm
+
           touch /dev/shm/.oracle-shm
         fi
         ;;
@@ -241,9 +251,7 @@ bash "shared_memory" do
   action :run
   not_if { ::File.exists?("/dev/shm/.oracle-shm") }
 end
-=end
 
-=begin
 # configure shared memory
 bash "shared_memory_config" do
   code <<-EOH
@@ -256,7 +264,6 @@ bash "shared_memory_config" do
   action :run
   not_if { ::File.exists?("/dev/shm/.oracle-shm") }
 end
-=end
 
 # second attempt to fix memory error
 # http://meandmyubuntulinux.blogspot.com/2012/06/trouble-shooting-oracle-11g.html

@@ -55,7 +55,7 @@ end
 
 # cannot run as root, will fail.
 bash "install-wls" do
-  cwd "#{Chef::Config['file_cache_path']}"
+  cwd Chef::Config['file_cache_path']
   code <<-EOF
     java \
     -jar #{node['dev']['global_user_home']}/#{node['dev']['wls_package']} -silent \
