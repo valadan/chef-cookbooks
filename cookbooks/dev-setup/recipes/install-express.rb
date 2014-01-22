@@ -34,17 +34,41 @@ end
   end
 end
 
+# config chkconfig
+bash "config_chkconfig" do
+  code <<-EOH
+    cat > /sbin/chkconfig <<-EOF
+#!/bin/bash
+# Oracle 11gR2 XE installer chkconfig hack for Ubuntu
+file=/etc/init.d/oracle-xe
+if [[ ! `tail -n1 $file | grep INIT` ]]; then
+echo >> $file
+echo '### BEGIN INIT INFO' >> $file
+echo '# Provides: OracleXE' >> $file
+echo '# Required-Start: $remote_fs $syslog' >> $file
+echo '# Required-Stop: $remote_fs $syslog' >> $file
+echo '# Default-Start: 2 3 4 5' >> $file
+echo '# Default-Stop: 0 1 6' >> $file
+echo '# Short-Description: Oracle 11g Express Edition' >> $file
+echo '### END INIT INFO' >> $file
+fi
+update-rc.d oracle-xe defaults 80 01
+    EOF
+    sudo chmod 755 /sbin/chkconfig
+  EOH
+  action :run
+  not_if { ::File.exists?("/sbin/chkconfig") }
+end
+
 # create kernel parameters
 bash "create_kernel_params" do
   code <<-EOH
     cat > /etc/sysctl.d/60-oracle.conf <<-EOF
-    # Oracle 11g XE kernel parameters
-    fs.file-max=6815744
-    net.ipv4.ip_local_port_range=9000 65500
-    kernel.sem=250 32000 100 128
-    # kernel.shmmax=429496729
-    kernel.shmmax=107374183
-    EOF
+# Oracle 11g XE kernel parameters  
+fs.file-max=6815744  
+net.ipv4.ip_local_port_range=9000 65000  
+kernel.sem=250 32000 100 128 
+kernel.shmmax=536870912
   EOH
   action :run
   not_if { ::File.exists?("/etc/sysctl.d/60-oracle.conf") }
@@ -53,7 +77,7 @@ end
 # load and verify the new kernel parameters
 bash "load_kernel_params" do
   code <<-EOH
-    service procps start
+    sudo service procps start
     sudo sysctl -q fs.file-max
     sudo sysctl -q kernel.shmmax
     sudo sysctl -q net.ipv4.ip_local_port_range
@@ -67,12 +91,13 @@ bash "misc_commands" do
   code <<-EOH
     sudo ln -s /usr/bin/awk /bin/awk
     sudo mkdir /var/lock/subsys
+    touch /var/lock/subsys/listener
   EOH
   action :run
   not_if { ::File.exists?("/var/lock/subsys") }
 end
 
-
+=begin
 # misc commands
 bash "misc_commands" do
   code <<-EOH
@@ -101,6 +126,8 @@ bash "misc_commands" do
   action :run
   not_if { ::File.exists?("/sbin/chkconfig") }
 end
+=end
+
 
 # copy zipped Oracle Database XE package to tmp directory
 remote_file "copy-express-to-home" do 
@@ -168,6 +195,7 @@ directory "/xe_logs" do
 end
 =end
 
+=begin
 # create shared memory
 bash "shared_memory" do
   code <<-EOH
@@ -213,7 +241,9 @@ bash "shared_memory" do
   action :run
   not_if { ::File.exists?("/dev/shm/.oracle-shm") }
 end
+=end
 
+=begin
 # configure shared memory
 bash "shared_memory_config" do
   code <<-EOH
@@ -225,6 +255,45 @@ bash "shared_memory_config" do
   EOH
   action :run
   not_if { ::File.exists?("/dev/shm/.oracle-shm") }
+end
+=end
+
+# second attempt to fix memory error
+# http://meandmyubuntulinux.blogspot.com/2012/06/trouble-shooting-oracle-11g.html
+bash "shared_moemory_another_way" do
+  code <<-EOH
+  sudo mkdir /dev/shm
+  sudo mount -t tmpfs shmfs -o size=2048m /dev/shm
+  cat > /etc/rc2.d/S01shm_load <<-EOF
+#!/bin/sh
+case "$1" in
+start) mkdir /var/lock/subsys 2>/dev/null
+  touch /var/lock/subsys/listener
+  rm /dev/shm 2>/dev/null
+  mkdir /dev/shm 2>/dev/null
+  mount -t tmpfs shmfs -o size=2048m /dev/shm ;;
+*) echo error
+   exit 1 ;;
+esac
+  EOF
+  chmod 755 /etc/rc2.d/S01shm_load 
+  EOH
+end
+
+# environment variables are set properly each time you log in or open a new shell
+bash "bash-login" do
+code <<-EOH
+  echo ". /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
+export ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe
+export ORACLE_SID=XE
+export NLS_LANG=`$ORACLE_HOME/bin/nls_lang.sh`
+export ORACLE_BASE=/u01/app/oracle
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+export PATH=$ORACLE_HOME/bin:$PATH"
+  >> #{node['dev']['global_user_home']}/.bashrc
+  EOH
+  user node['dev']['global_user']
+  action :run
 end
 
 # install Oracle Database XE
@@ -241,14 +310,13 @@ end
 
 # configure Oracle Database XE
 bash "configure-express" do
-  #cwd "#{Chef::Config[:file_cache_path]}/Disk1"
-  #cwd "#{node['dev']['global_user_home']}"
-  code "sudo /etc/init.d/oracle-xe configure \
-    responseFile=#{Chef::Config[:file_cache_path]}/Disk1/response/#{node['dev']['express_response_file']} \
-    >> /tmp/XEsilentinstall.log"
+  code "/etc/init.d/oracle-xe configure \
+    responseFile=#{Chef::Config[:file_cache_path]}/Disk1/response/#{node['dev']['express_response_file']}"
+   # >> /tmp/XEsilentinstall.log"
   action :run
 end
 
+=begin
 # set Oracle Database XE environment variables
 bash "set_express_env_vars" do
   cwd "/u01/app/oracle/product/11.2.0/xe/bin"
@@ -256,11 +324,4 @@ bash "set_express_env_vars" do
   action :run
   user node['dev']['global_user']
 end
-
-# environment variables are set properly each time you log in or open a new shell
-bash "bash-login" do
-  code "echo '. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh' \
-    >> #{node['dev']['global_user_home']}/.bashrc"
-  user node['dev']['global_user']
-  action :run
-end
+=end

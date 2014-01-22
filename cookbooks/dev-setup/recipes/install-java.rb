@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-remote_file "copy-jdk-to-home" do 
+remote_file "copy-jdk-to-cache" do 
   path "#{Chef::Config[:file_cache_path]}/#{node['dev']['java_jdk_package']}" 
   source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['java_jdk_package']}"
   #not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/#{node['dev']['java_jdk_package']}") }
