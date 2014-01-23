@@ -34,7 +34,7 @@ end
   end
 end
 
-bash "make_swap" do
+bash "make-swap" do
   code <<-EOH
     dd if=/dev/zero of=/home/swapfile bs=1024 count=1048576
     mkswap /home/swapfile
@@ -46,7 +46,7 @@ bash "make_swap" do
 end
 
 # config chkconfig
-bash "config_chkconfig" do
+bash "config-chkconfig" do
   code <<-EOH
     cat > /sbin/chkconfig <<-EOF
 #!/bin/bash
@@ -72,7 +72,7 @@ update-rc.d oracle-xe defaults 80 01
 end
 
 # create kernel parameters
-bash "create_kernel_params" do
+bash "create-kernel-params" do
 code <<-EOH
     echo "### Oracle 11g Kernel Parameters ####
 fs.suid_dumpable = 1
@@ -95,7 +95,7 @@ net.core.wmem_max=1048586" > /etc/sysctl.d/60-oracle.conf
 end
 
 # misc commands
-bash "misc_commands" do
+bash "misc-commands" do
   code <<-EOH
     sudo ln -s /usr/bin/awk /bin/awk
     sudo mkdir /var/lock/subsys
@@ -132,7 +132,7 @@ bash "convert-rpm" do
 end
 
 # create response file dynamically
-bash "create_response_file" do
+bash "create-response-file" do
   cwd "#{Chef::Config[:file_cache_path]}/Disk1/response"
   code <<-EOH
     echo "ORACLE_LISTENER_PORT=#{node['dev']['express_listen_port']}
@@ -215,7 +215,7 @@ end
 
 # second attempt to fix memory error
 # http://meandmyubuntulinux.blogspot.com/2012/06/trouble-shooting-oracle-11g.html
-bash "shared_memory_another_way" do
+bash "shared-memory" do
   code <<-EOH
   rm /dev/shm 2>/dev/null
   mkdir /dev/shm 2>/dev/null
@@ -249,11 +249,12 @@ export PATH=$ORACLE_HOME/bin:$PATH"
   >> #{node['dev']['global_user_home']}/.bashrc
   EOH
   user node['dev']['global_user']
+  group node['dev']['global_group']
   action :run
 end
 
 # install Oracle Database XE
-bash "install_express" do
+bash "install-express" do
   cwd "#{Chef::Config[:file_cache_path]}/Disk1"
   #cwd "#{node['dev']['global_user_home']}/Disk1"
   code <<-EOH
@@ -274,12 +275,11 @@ bash "configure-express" do
   action :run
 end
 
-=begin
 # set Oracle Database XE environment variables
-bash "set_express_env_vars" do
+bash "set-express-env-vars" do
   cwd "/u01/app/oracle/product/11.2.0/xe/bin"
   code ". ./oracle_env.sh"
   action :run
   user node['dev']['global_user']
+  group node['dev']['global_group']
 end
-=end
