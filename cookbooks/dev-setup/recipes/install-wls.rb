@@ -18,7 +18,7 @@
 #
 #
 
-wl_home_tmp = "#{ENV['ORACLE_HOME']}/wlserver/server"
+wl_home_tmp = "#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server"
 
 # create inventory file
 directory "#{node['dev']['global_user_home']}/oui_inventory" do
@@ -66,8 +66,8 @@ bash "install-wls" do
   code <<-EOF
     java \
     -jar #{node['dev']['wls_package']} -silent \
-    -response #{node['dev']['wls_response_file']} \
-    -invPtrLoc #{node['dev']['wls_install_loc_file']}
+    -response #{Chef::Config['file_cache_path']}/#{node['dev']['wls_response_file']} \
+    -invPtrLoc #{Chef::Config['file_cache_path']}/#{node['dev']['wls_install_loc_file']}
     EOF
   user node['dev']['global_user']
   group node['dev']['global_group']

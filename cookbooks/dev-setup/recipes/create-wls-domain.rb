@@ -18,8 +18,8 @@
 #
 
 products_home_tmp   = "#{node['dev']['global_user_home']}/Oracle/products"
-wl_home_tmp         = "#{ENV['ORACLE_HOME']}/wlserver/server"
-domains_home_tmp    = "#{ENV['WL_DOMAINS']}/#{node['dev']['wls_domain']}"
+wl_home_tmp         = "#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server"
+domains_home_tmp    = "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains"
 
 # used next two commands to build directories because recursive doesn't apply rights correctly. Remain as root!
 directory "#{products_home_tmp}/user_projects" do
@@ -40,14 +40,14 @@ bash 'set-wls-env' do
   code ". #{wl_home_tmp}/bin/setWLSEnv.sh"
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?(domains_home_tmp) }
+  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
   action :run
 end
 
 # requires echo 'y' since there is no config.xml.
 # installer asks to create? y/n?
 bash 'create-domain' do
-  cwd ENV['WL_DOMAINS']
+  cwd "#{domains_home_tmp}"
   code <<-EOF
     echo 'Y' | java \
     -XX:MaxPermSize=1048m -Xms512m -Xmx1024m \
@@ -61,16 +61,16 @@ bash 'create-domain' do
    EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?(domains_home_tmp) }
+  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
   action :run
 end
 
 bash 'stop-domain' do
-  cwd "#{ENV['WL_DOMAINS']}/bin"
+  cwd "#{domains_home_tmp}/bin"
   code "sh stopWeblogic.sh"
   user node['dev']['global_user']
   group node['dev']['global_group']
-  only_if { ::File.exists?(domains_home_tmp) }
+  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
   action :run
 end
 
@@ -86,7 +86,7 @@ end
 
 # need a better alternative, like create a shell script that can be called after provisioning.
 bash 'start-domain' do
-  cwd ENV['WL_DOMAINS']
+  cwd "#{domains_home_tmp}"
   code <<-EOF
     java -verbose \
     -XX:MaxPermSize=1024m -Xms512m -Xmx1024m \
@@ -96,7 +96,7 @@ bash 'start-domain' do
    EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?(domains_home_tmp) }
+  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
   action :nothing
 end
 

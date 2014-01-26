@@ -19,7 +19,7 @@
 
 bash "remove-swap" do
   code <<-EOF
-    grep -q "swapfile" /etc/fstab
+    grep -q swapfile /etc/fstab
     if [ $? -eq 0 ]; then
       echo 'swapfile found. Removing swapfile.'
       sed -i '/swapfile/d' /etc/fstab

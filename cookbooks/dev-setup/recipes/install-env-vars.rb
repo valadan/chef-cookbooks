@@ -21,20 +21,21 @@
 bash "install-env-vars" do
   cwd node['dev']['global_user_home']
   code <<-EOH
-    grep -q #{ENV['JAVA_HOME']} .bashrc
+    grep -q JAVA_HOME .bashrc
     if [ $? -ne 0 ]; then
       echo "
 export JAVA_HOME=/usr/lib/jvm/#{node['dev']['java_jdk']}
 export CONFIG_JVM_ARGS=-Djava.security.egd=file:/dev/urandom
 export ORACLE_HOME=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home
-export WL_HOME=${ORACLE_HOME}/wlserver
-export PATH=${JAVA_HOME}/bin:${WL_HOME}/server/bin:#{ENV['PATH']}
+export WL_HOME=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver
+export PATH=/usr/lib/jvm/#{node['dev']['java_jdk']}/bin:$PATH
+export PATH=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server/bin:$PATH
 export WL_DOMAINS=#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains
-export CLASSPATH=${WL_HOME}/server/lib/weblogic.jar:#{ENV['CLASSPATH']}" >> .bashrc
+export CLASSPATH=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server/lib/weblogic.jar:$CLASSPATH" >> .bashrc
     fi
   EOH
-  #user node['dev']['global_user']
-  #group node['dev']['global_group']
+  user node['dev']['global_user']
+  group node['dev']['global_group']
   action :run
 end
 
@@ -49,13 +50,14 @@ end
 # set varialbes temporarily for immediate use
 bash "temp-install-env-vars" do
   code <<-EOH
-    export JAVA_HOME=/usr/lib/jvm/#{node['dev']['java_jdk']}
-    export CONFIG_JVM_ARGS=-Djava.security.egd=file:/dev/urandom
-    export ORACLE_HOME=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home
-    export WL_HOME=${ORACLE_HOME}/wlserver
-    export PATH=${JAVA_HOME}/bin:${WL_HOME}/server/bin:#{ENV['PATH']}
-    export WL_DOMAINS=#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains
-    export CLASSPATH=${WL_HOME}/server/lib/weblogic.jar:#{ENV['CLASSPATH']}" >> .bashrc
+export JAVA_HOME=/usr/lib/jvm/#{node['dev']['java_jdk']}
+export CONFIG_JVM_ARGS=-Djava.security.egd=file:/dev/urandom
+export ORACLE_HOME=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home
+export WL_HOME=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver
+export PATH=/usr/lib/jvm/#{node['dev']['java_jdk']}/bin:$PATH
+export PATH=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server/bin:$PATH
+export WL_DOMAINS=#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains
+export CLASSPATH=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server/lib/weblogic.jar:$CLASSPATH
   EOH
   user node['dev']['global_user']
   group node['dev']['global_group']

@@ -19,7 +19,7 @@
 
 bash "create-swap" do
   code <<-EOF
-    grep -q "swapfile" /etc/fstab
+    grep -q swapfile /etc/fstab
     if [ $? -ne 0 ]; then
       echo 'swapfile not found. Adding swapfile.'
       fallocate -l #{node['dev']['swap_size_mb']}M /swapfile
