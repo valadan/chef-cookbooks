@@ -40,7 +40,7 @@ bash 'set-wls-env' do
   code ". #{wl_home_tmp}/bin/setWLSEnv.sh"
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
+  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
   action :run
 end
 
@@ -61,7 +61,7 @@ bash 'create-domain' do
    EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
+  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
   action :run
 end
 
@@ -70,7 +70,7 @@ bash 'stop-domain' do
   code "sh stopWeblogic.sh"
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
+  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
   action :run
 end
 
@@ -96,7 +96,7 @@ bash 'start-domain' do
    EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
+  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
   action :nothing
 end
 
