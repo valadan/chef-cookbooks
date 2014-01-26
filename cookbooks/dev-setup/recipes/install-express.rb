@@ -144,75 +144,6 @@ ORACLE_DBENABLE=y" > #{node['dev']['express_response_file']}
   action :run
 end
 
-=begin
-# create shared memory
-bash "shared_memory" do
-  code <<-EOH
-    cat > /etc/init.d/oracle-shm <<-EOF
-    #! /bin/sh
-    # /etc/init.d/oracle-shm
-    #
-    #
-    case "\$1" in
-      start)
-        echo "Starting script /etc/init.d/oracle-shm"
-        # Run only once at system startup
-        if [ -e /dev/shm/.oracle-shm ]; then
-          echo "/dev/shm is already mounted, nothing to do"
-        else
-          rm -f /dev/shm
-          mkdir /dev/shm
-
-          # orginal method
-          #mount -B /run/shm /dev/shm
-
-          # alternative 2
-          mount --move /run/shm /dev/shm
-          mount -B /dev/shm /run/shm
-
-          # alternaitve 3
-          #mount -t tmpfs shmfs -o size=2048m /dev/shm
-
-          touch /dev/shm/.oracle-shm
-        fi
-        ;;
-      stop)
-        echo "Stopping script /etc/init.d/oracle-shm"
-        echo "Nothing to do"
-        ;;
-      *)
-        echo "Usage: /etc/init.d/oracle-shm {start|stop}"
-        exit 1
-        ;;
-    esac
-    #
-    ### BEGIN INIT INFO
-    # Provides:          oracle-shm
-    # Required-Start:    $remote_fs $syslog
-    # Required-Stop:     $remote_fs $syslog
-    # Default-Start:     2 3 4 5
-    # Default-Stop:      0 1 6 
-    # Short-Description: Bind /run/shm to /dev/shm at system startup.
-    # Description:       Fix to allow Oracle 11g use AMM.
-    ### END INIT INFO
-    EOF
-  EOH
-  action :run
-  not_if { ::File.exists?("/dev/shm/.oracle-shm") }
-end
-
-# configure shared memory
-bash "shared_memory_config" do
-  code <<-EOH
-    chmod 755 /etc/init.d/oracle-shm
-    update-rc.d oracle-shm defaults 01 99
-    sudo cat /etc/mtab | grep shm
-  EOH
-  action :run
-  not_if { ::File.exists?("/dev/shm/.oracle-shm") }
-end
-=end
-
 # second attempt to fix memory error
 # http://meandmyubuntulinux.blogspot.com/2012/06/trouble-shooting-oracle-11g.html
 bash "shared-memory" do
@@ -239,7 +170,8 @@ end
 # environment variables are set properly each time you log in or open a new shell
 bash "bash-login" do
 code <<-EOH
-  echo ". /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
+  echo "
+. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
 export ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe
 export ORACLE_SID=XE
 export NLS_LANG=`$ORACLE_HOME/bin/nls_lang.sh`

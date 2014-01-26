@@ -18,8 +18,9 @@
 #
 #
 
-wl_home_tmp = "#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server"
+wl_home_tmp = "#{ENV['ORACLE_HOME']}/wlserver/server"
 
+# create inventory file
 directory "#{node['dev']['global_user_home']}/oui_inventory" do
   owner node['dev']['global_user']
   group node['dev']['global_group']
@@ -28,27 +29,33 @@ directory "#{node['dev']['global_user_home']}/oui_inventory" do
   not_if { ::File.exists?(wl_home_tmp) }
 end
 
-cookbook_file "#{node['dev']['global_user_home']}/#{node['dev']['wls_install_loc_file']}" do
-  source node['dev']['wls_install_loc_file']
-  owner node['dev']['global_user']
+# create wls location file
+bash 'create-location-file' do
+  cwd Chef::Config[:file_cache_path]
+  code <<-EOH
+    echo "
+inventory_loc=#{node['dev']['global_user_home']}/oui_inventory
+inst_group=node['dev']['global_user']" > oraInst.loc
+  EOH
+  user node['dev']['global_user']
   group node['dev']['global_group']
-  mode 0777
+  action :run
   not_if { ::File.exists?(wl_home_tmp) }
 end
 
-cookbook_file "#{node['dev']['global_user_home']}/#{node['dev']['wls_response_file']}" do
+# copy response file to cache
+cookbook_file "#{Chef::Config[:file_cache_path]}/#{node['dev']['wls_response_file']}" do
   source node['dev']['wls_response_file']
   owner node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?(wl_home_tmp) }
 end
 
-remote_file "copy-wls-to-home" do 
-  path "#{node['dev']['global_user_home']}/#{node['dev']['wls_package']}" 
+# copy wls jar to cache
+remote_file "copy-wls-to-cache" do 
+  path "#{Chef::Config[:file_cache_path]}/#{node['dev']['wls_package']}" 
   source "file:///#{node['dev']['global_sync_folder']}/#{node['dev']['wls_package']}"
   checksum node['dev']['wls_pkg_checksum']
-  owner node['dev']['global_user']
-  group node['dev']['global_group']
   mode 0755
   not_if { ::File.exists?(wl_home_tmp) }
 end
@@ -58,16 +65,12 @@ bash "install-wls" do
   cwd Chef::Config['file_cache_path']
   code <<-EOF
     java \
-    -jar #{node['dev']['global_user_home']}/#{node['dev']['wls_package']} -silent \
-    -response #{node['dev']['global_user_home']}/#{node['dev']['wls_response_file']} \
-    -invPtrLoc #{node['dev']['global_user_home']}/#{node['dev']['wls_install_loc_file']}
+    -jar #{node['dev']['wls_package']} -silent \
+    -response #{node['dev']['wls_response_file']} \
+    -invPtrLoc #{node['dev']['wls_install_loc_file']}
     EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?(wl_home_tmp) }
   action :run
 end
-
-#file "#{Chef::Config['file_cache_path']}/#{node['dev']['wls_package']}" do 
-#  action :delete
-#end

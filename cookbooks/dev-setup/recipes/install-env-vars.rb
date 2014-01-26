@@ -17,17 +17,24 @@
 # limitations under the License.
 #
 
-cookbook_file "#{node['dev']['global_user_home']}/#{node['dev']['java_install_env_vars']}" do
-  source node['dev']['java_install_env_vars']
-  owner node['dev']['global_user']
-  group node['dev']['global_group']
-  mode 0755
-end
-
+# install environment variables
 bash "install-env-vars" do
-  code "sh #{node['dev']['global_user_home']}/#{node['dev']['java_install_env_vars']}"
-  user node['dev']['global_user']
-  group node['dev']['global_group']
+  cwd node['dev']['global_user_home']
+  code <<-EOH
+    grep -q #{ENV['JAVA_HOME']} .bashrc
+    if [ $? -ne 0 ]; then
+      echo "
+export JAVA_HOME=/usr/lib/jvm/#{node['dev']['java_jdk']}
+export CONFIG_JVM_ARGS=-Djava.security.egd=file:/dev/urandom
+export ORACLE_HOME=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home
+export WL_HOME=${ORACLE_HOME}/wlserver
+export PATH=${JAVA_HOME}/bin:${WL_HOME}/server/bin:#{ENV['PATH']}
+export WL_DOMAINS=#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains
+export CLASSPATH=${WL_HOME}/server/lib/weblogic.jar:#{ENV['CLASSPATH']}" >> .bashrc
+    fi
+  EOH
+  #user node['dev']['global_user']
+  #group node['dev']['global_group']
   action :run
 end
 
@@ -39,16 +46,18 @@ bash "bash-login" do
   action :run
 end
 
-bash "temp_install_env_vars" do
+# set varialbes temporarily for immediate use
+bash "temp-install-env-vars" do
   code <<-EOH
-    export JAVA_HOME='/usr/lib/jvm/#{node['dev']['java_jdk']}'
-    export PATH='$JAVA_HOME/bin:$PATH'
-    export CONFIG_JVM_ARGS='-Djava.security.egd=file:/dev/urandom'
-    export ORACLE_HOME='$HOME/Oracle/products/Oracle_Home'
-    export WL_HOME='$ORACLE_HOME/wlserver'
-    export PATH='$WL_HOME/server/bin:$PATH'
-    export WL_DOMAINS="#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains"
-    export CLASSPATH='$WL_HOME/server/lib/weblogic.jar:$CLASSPATH'
-    EOH
+    export JAVA_HOME=/usr/lib/jvm/#{node['dev']['java_jdk']}
+    export CONFIG_JVM_ARGS=-Djava.security.egd=file:/dev/urandom
+    export ORACLE_HOME=#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home
+    export WL_HOME=${ORACLE_HOME}/wlserver
+    export PATH=${JAVA_HOME}/bin:${WL_HOME}/server/bin:#{ENV['PATH']}
+    export WL_DOMAINS=#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains
+    export CLASSPATH=${WL_HOME}/server/lib/weblogic.jar:#{ENV['CLASSPATH']}" >> .bashrc
+  EOH
+  user node['dev']['global_user']
+  group node['dev']['global_group']
   action :run
 end
