@@ -34,6 +34,7 @@ end
   end
 end
 
+# make swapfile
 bash "make-swap" do
   code <<-EOH
     dd if=/dev/zero of=/home/swapfile bs=1024 count=1048576
@@ -188,7 +189,6 @@ end
 # install Oracle Database XE
 bash "install-express" do
   cwd "#{Chef::Config[:file_cache_path]}/Disk1"
-  #cwd "#{node['dev']['global_user_home']}/Disk1"
   code <<-EOH
     sudo dpkg --install #{node['dev']['express_package_deb']} \
     > /tmp/XEsilentinstall.log

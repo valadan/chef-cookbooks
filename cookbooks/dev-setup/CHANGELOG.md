@@ -13,7 +13,22 @@ This file is used to list changes made in each version of the dev-setup cookbook
 
 0.3.0
 -----
-- Gary A. Stafford - (4) recipes working: install-java, install-env-vars, create-swapfile, install-wls,  (2013-12-28)
+- Gary A. Stafford - (4) recipes working: 
+	install-java,
+	install-env-vars,
+	create-swapfile,
+	install-wls
+(2013-12-28)
+
+0.5.0
+-----
+- Gary A. Stafford - (5) recipes working: 
+		install-java,
+		install-env-vars,
+		create-swapfile,
+		install-wls,
+		install-express
+(2014-01-26)
 
 - - -
 Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.

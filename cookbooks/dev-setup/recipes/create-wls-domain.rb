@@ -19,7 +19,7 @@
 
 products_home_tmp   = "#{node['dev']['global_user_home']}/Oracle/products"
 wl_home_tmp         = "#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server"
-domains_home_tmp    = "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains"
+domains_home_tmp    = "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains/#{node['dev']['wls_domain']}"
 
 # used next two commands to build directories because recursive doesn't apply rights correctly. Remain as root!
 directory "#{products_home_tmp}/user_projects" do
@@ -36,12 +36,35 @@ directory "#{products_home_tmp}/user_projects/domains" do
   action :create
 end
 
+directory "#{products_home_tmp}/user_projects/domains/#{node['dev']['wls_domain']}" do
+  owner node['dev']['global_user']
+  group node['dev']['global_group']
+  mode 0777
+  action :create
+end
+
 bash 'set-wls-env' do
   code ". #{wl_home_tmp}/bin/setWLSEnv.sh"
   user node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?("#{domains_home_tmp}/servers") }
   action :run
+end
+
+# need a better alternative, like create a shell script that can be called after provisioning.
+bash 'start-domain' do
+  cwd "#{domains_home_tmp}"
+  code <<-EOF
+    java -verbose \
+    -XX:MaxPermSize=1024m -Xms512m -Xmx1024m \
+    -Dweblogic.Name=#{node['dev']['wls_server']} \
+    -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server \
+    >> start_domain.sh
+   EOF
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
+  action :nothing
 end
 
 # requires echo 'y' since there is no config.xml.
@@ -83,20 +106,3 @@ bash 'enable-tunneling' do
   action :run
 end
 =end
-
-# need a better alternative, like create a shell script that can be called after provisioning.
-bash 'start-domain' do
-  cwd "#{domains_home_tmp}"
-  code <<-EOF
-    java -verbose \
-    -XX:MaxPermSize=1024m -Xms512m -Xmx1024m \
-    -Dweblogic.Name=#{node['dev']['wls_server']} \
-    -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server \
-    >> start_domain.sh
-   EOF
-  user node['dev']['global_user']
-  group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
-  action :nothing
-end
-
