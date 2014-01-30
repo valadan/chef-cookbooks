@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: dev-setup
-# Recipe:: install-env-vars
+# Recipe:: create-wls-domain
 #
 # Copyright 2013, Gary A. Stafford
 #
@@ -64,7 +64,7 @@ bash 'start-domain' do
   user node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?("#{domains_home_tmp}/servers") }
-  action :nothing
+  action :run
 end
 
 # requires echo 'y' since there is no config.xml.
@@ -88,6 +88,7 @@ bash 'create-domain' do
   action :run
 end
 
+# never gets here - server starts previous to this and won't move any further
 bash 'stop-domain' do
   cwd "#{domains_home_tmp}/bin"
   code "sh stopWeblogic.sh"
