@@ -38,7 +38,7 @@ end
 
 
 remote_directory Chef::Config[:file_cache_path] do
-  source "#{node['dev']['wls_response_file']}/wlst-create-domain"
+  source "#{node['dev']['global_sync_folder']}/wlst-create-domain"
   owner node['dev']['global_user']
   group node['dev']['global_group']
   mode 0777  
