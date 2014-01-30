@@ -49,8 +49,8 @@ bash 'create-domain' do
   code "java weblogic.WLST config.py"
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
-  action :nothing
+  not_if { ::File.exists?(domains_home_tmp) }
+  action :run
 end
 
 =begin
