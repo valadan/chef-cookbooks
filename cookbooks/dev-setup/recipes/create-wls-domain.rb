@@ -53,7 +53,7 @@ end
 
 # need a better alternative, like create a shell script that can be called after provisioning.
 bash 'start-domain' do
-  cwd "#{domains_home_tmp}"
+  cwd domains_home_tmp
   code <<-EOF
     java -verbose \
     -XX:MaxPermSize=1024m -Xms512m -Xmx1024m \
@@ -70,7 +70,7 @@ end
 # requires echo 'y' since there is no config.xml.
 # installer asks to create? y/n?
 bash 'create-domain' do
-  cwd "#{domains_home_tmp}"
+  cwd domains_home_tmp
   code <<-EOF
     echo 'Y' | java \
     -XX:MaxPermSize=1048m -Xms512m -Xmx1024m \

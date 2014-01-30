@@ -19,7 +19,7 @@
 
 products_home_tmp   = "#{node['dev']['global_user_home']}/Oracle/products"
 wl_home_tmp         = "#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server"
-domains_home_tmp    = "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains/#{node['dev']['wls_domain']}"
+domains_home_tmp    = "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains"
 
 # used next two commands to build directories because recursive doesn't apply rights correctly. Remain as root!
 directory "#{products_home_tmp}/user_projects" do
@@ -37,7 +37,7 @@ directory "#{products_home_tmp}/user_projects/domains" do
 end
 
 
-remote_directory Chef::Config[:file_cache_path] do
+remote_directory domains_home_tmp do
   source "wlst-create-domain"
   owner node['dev']['global_user']
   group node['dev']['global_group']
@@ -45,11 +45,11 @@ remote_directory Chef::Config[:file_cache_path] do
 end
 
 bash 'create-domain' do
-  cwd Chef::Config[:file_cache_path]
+  cwd domains_home_tmp
   code "java weblogic.WLST config.py"
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?(domains_home_tmp) }
+  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
   action :run
 end
 
