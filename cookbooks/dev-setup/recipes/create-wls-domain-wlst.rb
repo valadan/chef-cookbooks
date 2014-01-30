@@ -39,9 +39,12 @@ end
 
 remote_directory domains_home_tmp do
   source "wlst-create-domain"
+  files_owner owner node['dev']['global_user']
+  files_group node['dev']['global_group']
+  files_mode 00644
   owner node['dev']['global_user']
   group node['dev']['global_group']
-  mode 0777  
+  mode 0755
 end
 
 bash 'create-domain' do
