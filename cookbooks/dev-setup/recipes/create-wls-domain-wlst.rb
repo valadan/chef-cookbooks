@@ -17,11 +17,13 @@
 # limitations under the License.
 #
 
+# local variables
 products_home_tmp   = "#{node['dev']['global_user_home']}/Oracle/products"
 wl_home_tmp         = "#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server"
 domains_home_tmp    = "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains"
 
-# used next two commands to build directories because recursive doesn't apply rights correctly. Remain as root!
+# used next two commands to build nested directories because 
+# recursive method doesn't seem to apply rights correctly. Remains as root...
 directory "#{products_home_tmp}/user_projects" do
   owner node['dev']['global_user']
   group node['dev']['global_group']
@@ -36,7 +38,7 @@ directory "#{products_home_tmp}/user_projects/domains" do
   action :create
 end
 
-
+# copy all WLST config files to domain home
 remote_directory domains_home_tmp do
   source "wlst-create-domain"
   files_owner owner node['dev']['global_user']
@@ -47,6 +49,16 @@ remote_directory domains_home_tmp do
   mode 0755
 end
 
+# set WLS environment variables
+bash 'set-wls-env' do
+  code ". #{wl_home_tmp}/bin/setWLSEnv.sh"
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
+  action :run
+end
+
+# create domain and managed server with WLST
 bash 'create-domain' do
   cwd domains_home_tmp
   code "java weblogic.WLST config.py"
@@ -55,23 +67,3 @@ bash 'create-domain' do
   not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
   action :run
 end
-
-=begin
-Dir.foreach("#{node['dev']['wls_response_file']}/wlst-create-domain") do |item|
-  next if item == '.' or item == '..'
-  cookbook_file "#{Chef::Config[:file_cache_path]}/item" do
-    source "#{node['dev']['wls_response_file']}/wlst-create-domain"
-    owner node['dev']['global_user']
-    group node['dev']['global_group']
-    not_if { ::File.exists?(wl_home_tmp) }
-  end
-end
-
-cookbook_file "#{Chef::Config[:file_cache_path]}/#{node['dev']['wls_response_file']}" do
-  source "#{node['dev']['wls_response_file']}/wlst-create-domain"
-  owner node['dev']['global_user']
-  group node['dev']['global_group']
-  not_if { ::File.exists?(wl_home_tmp) }
-end
-=end
-
