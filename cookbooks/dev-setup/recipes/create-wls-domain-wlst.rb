@@ -61,7 +61,7 @@ end
 # create domain and managed server with WLST
 bash 'create-domain' do
   cwd domains_home_tmp
-  code "java weblogic.WLST config.py"
+  code "java -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server weblogic.WLST config.py"
   user node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
