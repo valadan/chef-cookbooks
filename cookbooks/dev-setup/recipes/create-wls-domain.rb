@@ -55,12 +55,12 @@ end
 bash 'start-domain' do
   cwd domains_home_tmp
   code <<-EOF
-    java -verbose \
-    -XX:MaxPermSize=1024m -Xms512m -Xmx1024m \
-    -Dweblogic.Name=#{node['dev']['wls_server']} \
-    -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server \
-    >> start_domain.sh
-   EOF
+    echo "java -verbose \
+-XX:MaxPermSize=1024m -Xms512m -Xmx1024m \
+-Dweblogic.Name=#{node['dev']['wls_server']} \
+-jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server"
+    > start_domain.sh
+  EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?("#{domains_home_tmp}/servers") }

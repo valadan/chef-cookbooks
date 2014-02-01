@@ -190,39 +190,44 @@ def create_RoleMapper_16(path, beanName):
   except java.lang.reflect.UndeclaredThrowableException,udt:
     pass
 
+def setAttributes_SecurityConfiguration_18():
+  cd("/SecurityConfiguration/development")
+  print "setting attributes for mbean type SecurityConfiguration"
+  setEncrypted("Credential", "c2s19", "c2sConfigdevelopment", "c2sSecretdevelopment")
+  setEncrypted("NodeManagerPassword", "c2s20", "c2sConfigdevelopment", "c2sSecretdevelopment")
+  setEncrypted("NodeManagerPassword", "c2s21", "c2sConfigdevelopment", "c2sSecretdevelopment")
+  set("NodeManagerUsername", "Weblogic")
+  setEncrypted("Credential", "c2s22", "c2sConfigdevelopment", "c2sSecretdevelopment")
+
+def setAttributes_EmbeddedLDAP_23():
+  cd("/EmbeddedLDAP/development")
+  print "setting attributes for mbean type EmbeddedLDAP"
+  setEncrypted("Credential", "c2s24", "c2sConfigdevelopment", "c2sSecretdevelopment")
+  setEncrypted("Credential", "c2s25", "c2sConfigdevelopment", "c2sSecretdevelopment")
+
 def setAttributesFor_applications_1():
   cd("/Servers/applications")
   print "setting attributes for mbean type Server"
-  set("ListenPort", "7709")
+  set("ListenPort", "7729")
   set("TunnelingEnabled", "true")
   set("ListenAddress", "")
 
-def setAttributes_EmbeddedLDAP_18():
-  cd("/EmbeddedLDAP/development")
-  print "setting attributes for mbean type EmbeddedLDAP"
-  setEncrypted("Credential", "c2s19", "c2sConfigdevelopment", "c2sSecretdevelopment")
-  setEncrypted("Credential", "c2s20", "c2sConfigdevelopment", "c2sSecretdevelopment")
-
-def setAttributes_Domain_21():
+def setAttributes_Domain_26():
   cd("/")
   print "setting attributes for mbean type Domain"
   set("DomainVersion", "12.1.2.0.0")
   set("ConfigurationVersion", "12.1.2.0.0")
-  set("AdminServerName", "applications")
+  set("AdminServerName", "AdminServer")
 
 def setAttributesFor_DefaultIdentityAsserter_11():
   cd("/SecurityConfiguration/development/Realms/myrealm/AuthenticationProviders/DefaultIdentityAsserter")
   print "setting attributes for mbean type DefaultIdentityAsserter"
   set("ActiveTypes", jarray.array(["AuthenticatedUser"], String))
 
-def setAttributes_SecurityConfiguration_22():
-  cd("/SecurityConfiguration/development")
-  print "setting attributes for mbean type SecurityConfiguration"
-  setEncrypted("Credential", "c2s23", "c2sConfigdevelopment", "c2sSecretdevelopment")
-  setEncrypted("NodeManagerPassword", "c2s24", "c2sConfigdevelopment", "c2sSecretdevelopment")
-  setEncrypted("NodeManagerPassword", "c2s25", "c2sConfigdevelopment", "c2sSecretdevelopment")
-  set("NodeManagerUsername", "weblogic")
-  setEncrypted("Credential", "c2s26", "c2sConfigdevelopment", "c2sSecretdevelopment")
+def setAttributes_SSL_27():
+  cd("/Servers/applications/SSL/applications")
+  print "setting attributes for mbean type SSL"
+  set("Enabled", "false")
 
 try:
   initConfigToScriptRun()
@@ -238,9 +243,10 @@ try:
   create_RoleMapper_16("/SecurityConfiguration/development/Realms/myrealm", "XACMLRoleMapper")
   setAttributesFor_applications_1()
   setAttributesFor_DefaultIdentityAsserter_11()
-  setAttributes_EmbeddedLDAP_18()
-  setAttributes_Domain_21()
-  setAttributes_SecurityConfiguration_22()
+  setAttributes_SecurityConfiguration_18()
+  setAttributes_EmbeddedLDAP_23()
+  setAttributes_Domain_26()
+  setAttributes_SSL_27()
   endTransaction()
 finally:
   endOfConfigToScriptRun()

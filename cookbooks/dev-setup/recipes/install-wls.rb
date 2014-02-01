@@ -43,9 +43,20 @@ inst_group=node['dev']['global_user']" > oraInst.loc
   not_if { ::File.exists?(wl_home_tmp) }
 end
 
+=begin
 # copy response file to cache
 cookbook_file "#{Chef::Config[:file_cache_path]}/#{node['dev']['wls_response_file']}" do
   source node['dev']['wls_response_file']
+  owner node['dev']['global_user']
+  group node['dev']['global_group']
+  not_if { ::File.exists?(wl_home_tmp) }
+end
+=end
+
+# response file from template
+template "#{Chef::Config[:file_cache_path]}/#{node['dev']['wls_response_file']}" do
+  source "#{node['dev']['wls_response_file']}.erb"
+  mode 0755
   owner node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?(wl_home_tmp) }

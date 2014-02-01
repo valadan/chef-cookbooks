@@ -44,8 +44,8 @@
 # WLS Domain/Server install settings
   default['dev']['wls_domain']              = 'development'
   default['dev']['wls_server']              = 'applications'
-  default['dev']['wls_username']            = 'weblogic'
-  default['dev']['wls_password']            = 'weblogic1'
+  default['dev']['wls_username']            = 'Weblogic'
+  default['dev']['wls_password']            = 'Weblogic1'
   default['dev']['wls_port']                = 7709
 
 # Database Express Edition install settings

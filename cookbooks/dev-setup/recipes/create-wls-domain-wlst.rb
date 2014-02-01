@@ -43,10 +43,10 @@ remote_directory domains_home_tmp do
   source "wlst-create-domain"
   files_owner owner node['dev']['global_user']
   files_group node['dev']['global_group']
-  files_mode 00644
+  files_mode 0777
   owner node['dev']['global_user']
   group node['dev']['global_group']
-  mode 0755
+  mode 0777
 end
 
 # set WLS environment variables
@@ -54,14 +54,16 @@ bash 'set-wls-env' do
   code ". #{wl_home_tmp}/bin/setWLSEnv.sh"
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
+  not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }
   action :run
 end
 
 # create domain and managed server with WLST
 bash 'create-domain' do
   cwd domains_home_tmp
-  code "java -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.WLST config.py"
+  code "sh #{wl_home_tmp}/../common/bin/wlst.sh config.py"
+  # below should work but get class not found error?
+  # code "java weblogic.WLST config.py"
   user node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?("#{domains_home_tmp}/#{node['dev']['wls_domain']}") }

@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<domain xmlns="http://xmlns.oracle.com/weblogic/domain" xmlns:sec="http://xmlns.oracle.com/weblogic/security" xmlns:wls="http://xmlns.oracle.com/weblogic/security/wls" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.oracle.com/weblogic/security/xacml http://xmlns.oracle.com/weblogic/security/xacml/1.0/xacml.xsd http://xmlns.oracle.com/weblogic/security/providers/passwordvalidator http://xmlns.oracle.com/weblogic/security/providers/passwordvalidator/1.0/passwordvalidator.xsd http://xmlns.oracle.com/weblogic/domain http://xmlns.oracle.com/weblogic/1.0/domain.xsd http://xmlns.oracle.com/weblogic/security http://xmlns.oracle.com/weblogic/1.0/security.xsd http://xmlns.oracle.com/weblogic/security/wls http://xmlns.oracle.com/weblogic/security/wls/1.0/wls.xsd">
+  <name>development</name>
+  <domain-version>12.1.2.0.0</domain-version>
+  <security-configuration>
+    <name>development</name>
+    <realm>
+      <sec:authentication-provider xsi:type="wls:default-authenticatorType">
+        <sec:name>DefaultAuthenticator</sec:name>
+      </sec:authentication-provider>
+      <sec:authentication-provider xsi:type="wls:default-identity-asserterType">
+        <sec:name>DefaultIdentityAsserter</sec:name>
+        <sec:active-type>AuthenticatedUser</sec:active-type>
+      </sec:authentication-provider>
+      <sec:role-mapper xmlns:xac="http://xmlns.oracle.com/weblogic/security/xacml" xsi:type="xac:xacml-role-mapperType">
+        <sec:name>XACMLRoleMapper</sec:name>
+      </sec:role-mapper>
+      <sec:authorizer xmlns:xac="http://xmlns.oracle.com/weblogic/security/xacml" xsi:type="xac:xacml-authorizerType">
+        <sec:name>XACMLAuthorizer</sec:name>
+      </sec:authorizer>
+      <sec:adjudicator xsi:type="wls:default-adjudicatorType">
+        <sec:name>DefaultAdjudicator</sec:name>
+      </sec:adjudicator>
+      <sec:credential-mapper xsi:type="wls:default-credential-mapperType">
+        <sec:name>DefaultCredentialMapper</sec:name>
+      </sec:credential-mapper>
+      <sec:cert-path-provider xsi:type="wls:web-logic-cert-path-providerType">
+        <sec:name>WebLogicCertPathProvider</sec:name>
+      </sec:cert-path-provider>
+      <sec:cert-path-builder>WebLogicCertPathProvider</sec:cert-path-builder>
+      <sec:name>myrealm</sec:name>
+      <sec:password-validator xmlns:pas="http://xmlns.oracle.com/weblogic/security/providers/passwordvalidator" xsi:type="pas:system-password-validatorType">
+        <sec:name>SystemPasswordValidator</sec:name>
+        <pas:min-password-length>8</pas:min-password-length>
+        <pas:min-numeric-or-special-characters>1</pas:min-numeric-or-special-characters>
+      </sec:password-validator>
+    </realm>
+    <default-realm>myrealm</default-realm>
+    <credential-encrypted>{AES}E2ELHkPUBbxmJ7N41W0zUACZUc3OwVOcZKs2RdvlJv9EwyCvSIZ7mJ3zwI12l+OZxzpDSNGkCoZ83LV81aZ2wxqV+BbIqPT9W9sff8Ln31d5MX4rAoeR9Rxyj9XMmxas</credential-encrypted>
+    <node-manager-username>Weblogic</node-manager-username>
+    <node-manager-password-encrypted>{AES}CW5149gzQo5+7qpvaDVCyM8rIJsY/phHCQR8BJNSiDM=</node-manager-password-encrypted>
+  </security-configuration>
+  <server>
+    <name>applications</name>
+    <ssl>
+      <enabled>false</enabled>
+    </ssl>
+    <listen-port>7709</listen-port>
+    <listen-address>ApplicationServer</listen-address>
+    <tunneling-enabled>true</tunneling-enabled>
+  </server>
+  <embedded-ldap>
+    <name>development</name>
+    <credential-encrypted>{AES}YTtAg4uQtj9VKZ/lVrQPuEyCRRloXGpoYBCYbfbVD7A6MnM+aIz4HXzFTTAtKnl1</credential-encrypted>
+  </embedded-ldap>
+  <configuration-version>12.1.2.0.0</configuration-version>
+  <admin-server-name>applications</admin-server-name>
+</domain>
