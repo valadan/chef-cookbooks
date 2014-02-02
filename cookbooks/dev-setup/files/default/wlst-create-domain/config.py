@@ -208,7 +208,7 @@ def setAttributes_EmbeddedLDAP_23():
 def setAttributesFor_applications_1():
   cd("/Servers/applications")
   print "setting attributes for mbean type Server"
-  set("ListenPort", "7729")
+  set("ListenPort", "7709")
   set("TunnelingEnabled", "true")
   set("ListenAddress", "")
 
@@ -217,7 +217,7 @@ def setAttributes_Domain_26():
   print "setting attributes for mbean type Domain"
   set("DomainVersion", "12.1.2.0.0")
   set("ConfigurationVersion", "12.1.2.0.0")
-  set("AdminServerName", "AdminServer")
+  set("AdminServerName", "applications")
 
 def setAttributesFor_DefaultIdentityAsserter_11():
   cd("/SecurityConfiguration/development/Realms/myrealm/AuthenticationProviders/DefaultIdentityAsserter")
