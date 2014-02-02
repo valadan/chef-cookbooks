@@ -94,7 +94,7 @@ template "#{domains_home_tmp}/enable-tunneling.py" do
   mode 0755
   owner node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
+  #not_if { ::File.exists?("#{domains_home_tmp}/enable-tunneling.py") }
 end
 
 # enable tunneling with WLST
@@ -105,14 +105,3 @@ bash 'enable-tunneling' do
   group node['dev']['global_group']
   action :run
 end
-=begin
-# never gets here - server starts previous to this and won't move any further
-bash 'stop-domain' do
-  cwd "#{domains_home_tmp}/bin"
-  code "sh stopWeblogic.sh"
-  user node['dev']['global_user']
-  group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
-  action :run
-end
-=end

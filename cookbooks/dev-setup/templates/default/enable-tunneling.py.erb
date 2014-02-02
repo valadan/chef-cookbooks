@@ -1,4 +1,4 @@
-connect("<%= node['dev']['wls_username'] -%>","<%= node['dev']['wls_password'] -%>","t3://localhost:<%= """#{node['dev']['port']}""" -%>")
+connect("<%= node['dev']['wls_username'] -%>","<%= node['dev']['wls_password'] -%>","t3://localhost:<%= """#{node['dev']['wls_port']}""" -%>")
 edit()
 startEdit()
 cd("/Servers/applications")
