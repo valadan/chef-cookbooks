@@ -61,7 +61,7 @@ end
 # create domain and managed server with WLST
 bash 'create-domain' do
   cwd domains_home_tmp
-  code "sh #{wl_home_tmp}/../common/bin/wlst.sh config.py"
+  code "nohup ./#{wl_home_tmp}/../common/bin/wlst.sh config.py > nohup.out 2>&1 &"
   # below should work but get class not found error?
   # code "java weblogic.WLST config.py"
   user node['dev']['global_user']
