@@ -72,14 +72,14 @@ end
 bash 'create-domain' do
   cwd domains_home_tmp
   code <<-EOF
-    echo 'Y' | java \
+    echo 'Y' | nohup java \
     -XX:MaxPermSize=1048m -Xms512m -Xmx1024m \
     -Dweblogic.Domain=#{node['dev']['wls_domain']} \
     -Dweblogic.Name=#{node['dev']['wls_server']} \
     -Dweblogic.management.username=#{node['dev']['wls_username']} \
     -Dweblogic.management.password=#{node['dev']['wls_password']} \
     -Dweblogic.ListenPort=#{node['dev']['wls_port']} \
-    -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server
+    -jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server > create-domain.out 2>&1 &
     exit $?
    EOF
   user node['dev']['global_user']
@@ -88,6 +88,24 @@ bash 'create-domain' do
   action :run
 end
 
+# enable tunneling py script from template
+template "#{domains_home_tmp}/enable-tunneling.py" do
+  source "enable-tunneling.py.erb"
+  mode 0755
+  owner node['dev']['global_user']
+  group node['dev']['global_group']
+  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
+end
+
+# enable tunneling with WLST
+bash 'enable-tunneling' do
+  cwd domains_home_tmp
+  code "nohup sh #{wl_home_tmp}/../common/bin/wlst.sh enable-tunneling.py > enable-tunneling.out 2>&1 &"
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+  action :run
+end
+=begin
 # never gets here - server starts previous to this and won't move any further
 bash 'stop-domain' do
   cwd "#{domains_home_tmp}/bin"
@@ -95,15 +113,6 @@ bash 'stop-domain' do
   user node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?("#{domains_home_tmp}/servers") }
-  action :run
-end
-
-=begin
-bash 'enable-tunneling' do
-  cwd "#{node['dev']['global_user_home']}/Oracle/products/user_projects/domains/config"
-  code "sed -i 's/<tunneling-enabled>false/<tunneling-enabled>true/g' config.xml"
-  user node['dev']['global_user']
-  group node['dev']['global_group']
   action :run
 end
 =end
