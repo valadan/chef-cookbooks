@@ -72,26 +72,10 @@ update-rc.d oracle-xe defaults 80 01
   not_if { ::File.exists?("/sbin/chkconfig") }
 end
 
-# create kernel parameters
-bash "create-kernel-params" do
-code <<-EOH
-    echo "### Oracle 11g Kernel Parameters ####
-fs.suid_dumpable = 1
-fs.aio-max-nr = 1048576
-fs.file-max = 6815744
-kernel.shmall = 2097152
-kernel.shmmax = 536870912
-kernel.shmmni = 4096
-
-### semaphores: semmsl, semmns, semopm, semmni ####
-kernel.sem = 250 32000 100 128
-net.ipv4.ip_local_port_range = 9000 65500
-net.core.rmem_default=4194304
-net.core.rmem_max=4194304
-net.core.wmem_default=262144
-net.core.wmem_max=1048586" > /etc/sysctl.d/60-oracle.conf
-  EOH
-  action :run
+# copy kernel parameters template to /etc/sysctl.d
+template "/etc/sysctl.d/60-oracle.conf" do
+  source "60-oracle.conf.erb"
+  mode 0755
   not_if { ::File.exists?("/etc/sysctl.d/60-oracle.conf") }
 end
 
@@ -132,17 +116,10 @@ bash "convert-rpm" do
   not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/#{node['dev']['express_package_deb']}") }
 end
 
-# create response file dynamically
-bash "create-response-file" do
-  cwd "#{Chef::Config[:file_cache_path]}/Disk1/response"
-  code <<-EOH
-    echo "ORACLE_LISTENER_PORT=#{node['dev']['express_listen_port']}
-ORACLE_HTTP_PORT=#{node['dev']['express_http_port']}
-ORACLE_PASSWORD=#{node['dev']['express_password']}
-ORACLE_CONFIRM_PASSWORD=#{node['dev']['express_password']}
-ORACLE_DBENABLE=y" > #{node['dev']['express_response_file']}
-  EOH
-  action :run
+# copy response file template to cache
+template "#{Chef::Config[:file_cache_path]}/Disk1/response/xe.rsp" do
+  source "xe.rsp.erb"
+  mode 0755
 end
 
 # second attempt to fix memory error
@@ -191,7 +168,7 @@ bash "install-express" do
   cwd "#{Chef::Config[:file_cache_path]}/Disk1"
   code <<-EOH
     sudo dpkg --install #{node['dev']['express_package_deb']} \
-    > /tmp/XEsilentinstall.log
+    > /tmp/install-express.log
   EOH
   action :run
   not_if { ::File.exists?("/etc/init.d/oracle-xe") }
@@ -201,10 +178,11 @@ end
 bash "configure-express" do
     code <<-EOH
       /etc/init.d/oracle-xe configure \
-      responseFile=#{Chef::Config[:file_cache_path]}/Disk1/response/#{node['dev']['express_response_file']} \
-      >> /tmp/XEsilentinstall.log
+      responseFile=#{Chef::Config[:file_cache_path]}/Disk1/response/xe.rsp \
+      >> /tmp/install-express.log
     EOH
-  action :run
+    not_if { ::File.exists?("/etc/init.d/oracle-xe") }
+action :run
 end
 
 # set Oracle Database XE environment variables

@@ -38,8 +38,8 @@
 # WLS install settings
   default['dev']['wls_package']             = 'wls_121200.jar'
   default['dev']['wls_pkg_checksum']        = 'e6efe85f3aec005ce037bd740f512e23c136635c63e20e02589ee0d0c50c065c'
-  default['dev']['wls_response_file']       = 'wls.rsp'
-  default['dev']['wls_install_loc_file']    = 'oraInst.loc'
+  #default['dev']['wls_response_file']       = 'wls.rsp'
+  #default['dev']['wls_install_loc_file']    = 'oraInst.loc'
 
 # WLS Domain/Server install settings
   default['dev']['wls_domain']              = 'development'

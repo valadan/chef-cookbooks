@@ -20,7 +20,7 @@
 
 wl_home_tmp = "#{node['dev']['global_user_home']}/Oracle/products/Oracle_Home/wlserver/server"
 
-# create inventory file
+# create inventory directory
 directory "#{node['dev']['global_user_home']}/oui_inventory" do
   owner node['dev']['global_user']
   group node['dev']['global_group']
@@ -29,33 +29,18 @@ directory "#{node['dev']['global_user_home']}/oui_inventory" do
   not_if { ::File.exists?(wl_home_tmp) }
 end
 
-# create wls location file
-bash 'create-location-file' do
-  cwd Chef::Config[:file_cache_path]
-  code <<-EOH
-    echo "
-inventory_loc=#{node['dev']['global_user_home']}/oui_inventory
-inst_group=node['dev']['global_user']" > oraInst.loc
-  EOH
-  user node['dev']['global_user']
-  group node['dev']['global_group']
-  action :run
-  not_if { ::File.exists?(wl_home_tmp) }
-end
-
-=begin
-# copy response file to cache
-cookbook_file "#{Chef::Config[:file_cache_path]}/#{node['dev']['wls_response_file']}" do
-  source node['dev']['wls_response_file']
+# copy wls location file from template
+template "#{Chef::Config[:file_cache_path]}/oraInst.loc" do
+  source "oraInst.loc.erb"
+  mode 0755
   owner node['dev']['global_user']
   group node['dev']['global_group']
   not_if { ::File.exists?(wl_home_tmp) }
 end
-=end
 
-# response file from template
-template "#{Chef::Config[:file_cache_path]}/#{node['dev']['wls_response_file']}" do
-  source "#{node['dev']['wls_response_file']}.erb"
+# copy response file from template
+template "#{Chef::Config[:file_cache_path]}/wls.rsp" do
+  source "wls.rsp.erb"
   mode 0755
   owner node['dev']['global_user']
   group node['dev']['global_group']
@@ -71,14 +56,15 @@ remote_file "copy-wls-to-cache" do
   not_if { ::File.exists?(wl_home_tmp) }
 end
 
+# install wls
 # cannot run as root, will fail.
 bash "install-wls" do
   cwd Chef::Config['file_cache_path']
   code <<-EOF
     java \
     -jar #{node['dev']['wls_package']} -silent \
-    -response #{Chef::Config['file_cache_path']}/#{node['dev']['wls_response_file']} \
-    -invPtrLoc #{Chef::Config['file_cache_path']}/#{node['dev']['wls_install_loc_file']}
+    -response #{Chef::Config['file_cache_path']}/wls.rsp \
+    -invPtrLoc #{Chef::Config['file_cache_path']}/oraInst.loc
     EOF
   user node['dev']['global_user']
   group node['dev']['global_group']

@@ -51,24 +51,10 @@ bash 'set-wls-env' do
   action :run
 end
 
-# need a better alternative, like create a shell script that can be called after provisioning.
-bash 'start-domain' do
-  cwd domains_home_tmp
-  code <<-EOF
-    echo "java -verbose \
--XX:MaxPermSize=1024m -Xms512m -Xmx1024m \
--Dweblogic.Name=#{node['dev']['wls_server']} \
--jar #{wl_home_tmp}/lib/weblogic.jar weblogic.Server"
-    > start_domain.sh
-  EOF
-  user node['dev']['global_user']
-  group node['dev']['global_group']
-  not_if { ::File.exists?("#{domains_home_tmp}/servers") }
-  action :run
-end
-
+# create domain, create admin server, and start
 # requires echo 'y' since there is no config.xml.
 # installer asks to create? y/n?
+# nohup runs wls in background so recipe continues to execute
 bash 'create-domain' do
   cwd domains_home_tmp
   code <<-EOF
@@ -94,10 +80,11 @@ template "#{domains_home_tmp}/enable-tunneling.py" do
   mode 0755
   owner node['dev']['global_user']
   group node['dev']['global_group']
-  #not_if { ::File.exists?("#{domains_home_tmp}/enable-tunneling.py") }
+  not_if { ::File.exists?("#{domains_home_tmp}/enable-tunneling.py") }
 end
 
 # enable tunneling with WLST
+# 'java weblogic.WLST' should work but get class not found error?
 bash 'enable-tunneling' do
   cwd domains_home_tmp
   code "nohup sh #{wl_home_tmp}/../common/bin/wlst.sh enable-tunneling.py > enable-tunneling.out 2>&1 &"
