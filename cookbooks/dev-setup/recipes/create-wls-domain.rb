@@ -87,8 +87,13 @@ end
 # 'java weblogic.WLST' should work but get class not found error?
 bash 'enable-tunneling' do
   cwd domains_home_tmp
-  code "nohup sh #{wl_home_tmp}/../common/bin/wlst.sh enable-tunneling.py > enable-tunneling.out 2>&1 &"
+    code <<-EOF
+      nohup sh #{wl_home_tmp}/../common/bin/wlst.sh enable-tunneling.py \
+        > enable-tunneling.out 2>&1 &
+        echo "tunneling enabled"
+    EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
   action :run
+  not_if "sleep 60000", :timeout => 60
 end
