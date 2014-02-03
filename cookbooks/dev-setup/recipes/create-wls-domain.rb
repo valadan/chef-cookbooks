@@ -88,12 +88,13 @@ end
 bash 'enable-tunneling' do
   cwd domains_home_tmp
     code <<-EOF
+      echo "enabling tunneling"
+      sleep 55s
       nohup sh #{wl_home_tmp}/../common/bin/wlst.sh enable-tunneling.py \
-        > enable-tunneling.out 2>&1 &
-        echo "tunneling enabled"
+      > enable-tunneling.out 2>&1 &
+      echo "tunneling enabled"
     EOF
   user node['dev']['global_user']
   group node['dev']['global_group']
   action :run
-  not_if "sleep 60000", :timeout => 60
 end
