@@ -1,7 +1,7 @@
 connect("<%= node['dev']['wls_username'] %>","<%= node['dev']['wls_password'] %>","t3://localhost:<%= node['dev']['wls_port']  %>")
 edit()
 startEdit()
-cd("/Servers/<%= node['dev']['wls_port'] %>")
+cd("/Servers/<%= node['dev']['wls_server'] %>")
 cmo.setTunnelingEnabled(true)
 save()
 activate()
