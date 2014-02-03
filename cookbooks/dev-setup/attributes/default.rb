@@ -27,8 +27,8 @@
   default['dev']['java_jdk_package']        = 'jdk-7u45-linux-x64.tar.gz'
   default['dev']['java_jdk']                = 'jdk1.7.0_45'
   default['dev']['java_jdk_pkg_checksum']   = 'f2eae4d81c69dfa79d02466d1cb34db2b628815731ffc36e9b98f96f46f94b1a'
-  default['dev']['java_install_jdk']        = 'install_jdk.sh'
-  default['dev']['java_install_env_vars']   = 'create_env_vars.sh'
+  #default['dev']['java_install_jdk']        = 'install_jdk.sh'
+  #default['dev']['java_install_env_vars']   = 'create_env_vars.sh'
   
 # Swapfile settings
   default['dev']['swap_create']             = 'create_swapfile.sh'
@@ -52,7 +52,7 @@
   default['dev']['express_package']         = 'oracle-xe-11.2.0-1.0.x86_64.rpm'
   default['dev']['express_package_deb']     = 'oracle-xe_11.2.0-2_amd64.deb'
   default['dev']['express_pkg_checksum']    = 'b5039fad2e4f92c68778dcabbd0b4622a6cb025f25f7d6222f9e9de53ebab531'
-  default['dev']['express_response_file']   = 'xe.rsp'
+  #default['dev']['express_response_file']   = 'xe.rsp'
   default['dev']['express_listen_port']     = 1529
   default['dev']['express_http_port']       = 8380
-  default['dev']['express_password']        = 'express1'
+  default['dev']['express_password']        = 'ChangeMe1'
