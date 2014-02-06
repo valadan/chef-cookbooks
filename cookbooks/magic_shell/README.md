@@ -1,70 +1,46 @@
-magic_shell Cookbook
-====================
-[![Build Status](https://secure.travis-ci.org/customink-webops/magic_shell.png)](http://travis-ci.org/customink-webops/magic_shell)
+Vagrant Chef Oracle Project
+---------------------------
 
-Provides utility for adding some syntactic sugar to your shell.
+Cookbook recipes to create (2) 64-bit Ubuntu Server-based Oracle/Java Development VMs with all applications other than an IDE, to build and test Java EE projects.
 
-Requirements
-------------
-None
+<h4>Major Components</h4>
+* Oracle JDK 1.7.0_45-b18 64-bit for Linux x86-64 (apps vm)
+* Oracle-related Environment variables (apps vm)
+* WebLogic Server 12.1.2 (apps vm)
+* (1) WLS domain / (1) WLS managed server (apps vm)
 
-Attributes
-----------
-None
+* Oracle Database Express Edition 11g Release 2 (11.2) for Linux x86-64 (dbs vm)
 
-Usage
------
-Update the `metadata.rb` for your cookbook to depend on magic_shell
+<h4>Recipes Tested and Working</h4>
+<table>
+  <tr>
+    <th>Recipe</th><th>Description</th>
+  </tr>
+  <tr>
+    <td>install-java</td><td>Installs Oracle JDK 1.7.0_45</td>
+  </tr>
+  <tr>
+    <td>install-env-vars</td><td>Installs Oracle-related environment variables</td>
+  </tr>
+  <tr>
+    <td>create-swapfile</td><td>Creates 1024 MB swapfile for WebLogic Server installer</td>
+  </tr>
+  <tr>
+    <td>install-wls</td><td>Installs Oracle WebLogic Server 12.1.2</td>
+  </tr>
+  <tr>
+    <td>install-wls-domain</td><td>Creates single WLS domain and server</td>
+  </tr>
+  <tr>
+    <td>install-express</td><td>Installs Oracle Database XE (**NEW - Working**)</td>
+  </tr>
+</table>
 
-```ruby
-depends 'magic_shell'
-```
+<h4>Required artifacts downloaded to separate 'chef-artifacts' repo in same parent folder</h4>
+* *[jdk-7u45-linux-x64.tar.gz] (http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)*
+* *[wls_121200.jar] (http://www.oracle.com/technetwork/middleware/weblogic/downloads/wls-for-dev-1703574.html)*
+* *[oracle-xe-11.2.0-1.0.x86_64.rpm.zip] (http://www.oracle.com/technetwork/database/database-technologies/express-edition/downloads/index.html)*
 
-Use the `magic_shell_alias` resource to create a command alias.
-
-```ruby
-magic_shell_alias 'myrailsapp' do
-  command 'cd /opt/myrailsapp/current'
-end
-```
-
-This will alias `myrailsapp` to `cd /opt/myrailsapp/current`.
-
-You can also remove aliases:
-
-```ruby
-magic_shell_alias 'myrailsapp' do
-  action :remove
-end
-```
-
-Use the `magic_shell_environment` resource to create a shell environment variable.
-
-```ruby
-magic_shell_environment 'EDITOR' do
-  value 'vim'
-end
-```
-
-This will export an `EDITOR` environment variable with a value of `vim`.
-
-You can also remove environment variables:
-
-```ruby
-magic_shell_environment 'EDITOR' do
-  action :remove
-end
-```
-
-Contributing
-------------
-1. Fork the repo
-2. Create a feature branch
-3. Code, document, write specs, test
-4. Submit a PR
-
-License and Authors
--------------------
-Author: [Nathen Harvey](https://github.com/nathenharvey) ([@nathenharvey](https://twitter.com/nathenharvey))
-
-Copyright 2012, CustomInk, LLC
+<h4>Ubuntu Cloud Image Used to Create VM</h4>
+* *[Preferred: Ubuntu Server 13.10 (Saucy Salamander) 64-bit daily build] (http://cloud-images.ubuntu.com/vagrant/saucy/current/saucy-server-cloudimg-amd64-vagrant-disk1.box)*
+* *[Alternate: Ubuntu Server 12.04 LTS (Precise Pangolin) 64-bit daily build] (http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box)*

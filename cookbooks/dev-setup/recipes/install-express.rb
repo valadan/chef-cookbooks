@@ -179,9 +179,9 @@ bash "configure-express" do
     code <<-EOH
       /etc/init.d/oracle-xe configure \
       responseFile=#{Chef::Config[:file_cache_path]}/Disk1/response/xe.rsp \
-      >> /tmp/install-express.log
+      > /tmp/configure-express.log
     EOH
-    not_if { ::File.exists?("/etc/init.d/oracle-xe") }
+    not_if { ::File.exists?("/tmp/configure-express.log") }
 action :run
 end
 
