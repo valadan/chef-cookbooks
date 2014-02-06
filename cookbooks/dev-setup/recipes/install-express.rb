@@ -44,6 +44,7 @@ bash "make-swap" do
     echo '/home/swapfile swap swap defaults 0 0' >> /etc/fstab
     swapon -s
   EOH
+  not_if { ::File.exists?("/home/swapfile") }  
 end
 
 # config chkconfig
@@ -120,6 +121,7 @@ end
 template "#{Chef::Config[:file_cache_path]}/Disk1/response/xe.rsp" do
   source "xe.rsp.erb"
   mode 0755
+  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/response/xe.rsp") }
 end
 
 # second attempt to fix memory error
@@ -143,6 +145,7 @@ esac
   EOF
   chmod 755 /etc/rc2.d/S01shm_load 
   EOH
+  not_if { ::File.exists?("/etc/init.d/oracle-xe") }
 end
 
 # environment variables are set properly each time you log in or open a new shell
@@ -161,6 +164,7 @@ export PATH=$ORACLE_HOME/bin:$PATH"
   user node['dev']['global_user']
   group node['dev']['global_group']
   action :run
+  not_if { ::File.exists?("/etc/init.d/oracle-xe") }
 end
 
 # install Oracle Database XE
@@ -181,7 +185,7 @@ bash "configure-express" do
       responseFile=#{Chef::Config[:file_cache_path]}/Disk1/response/xe.rsp \
       >> /tmp/install-express.log
     EOH
-    #not_if { ::File.exists?("/etc/init.d/oracle-xe") }
+    not_if { ::File.exists?("/etc/init.d/oracle-xe") }
 action :run
 end
 
@@ -192,4 +196,5 @@ bash "set-express-env-vars" do
   action :run
   user node['dev']['global_user']
   group node['dev']['global_group']
+  not_if { ::File.exists?("/etc/init.d/oracle-xe") }
 end
