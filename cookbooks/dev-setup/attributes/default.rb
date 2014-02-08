@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-# General settings
+# User/Group settings
   default['dev']['global_sync_folder']      = 'vagrant'
   default['dev']['global_user']             = 'vagrant'
   default['dev']['global_group']            = 'vagrant'
@@ -31,7 +31,7 @@
 # Swapfile settings
   default['dev']['swap_size_mb']            = '2048'
 
-# WLS install settings
+# WebLogic Server install settings
   default['dev']['wls_package']             = 'wls_121200.jar'
   default['dev']['wls_pkg_checksum']        = 'e6efe85f3aec005ce037bd740f512e23c136635c63e20e02589ee0d0c50c065c'
 
