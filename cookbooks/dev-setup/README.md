@@ -1,54 +1,38 @@
-This directory contains the cookbooks used to configure systems in your infrastructure with Chef.
+## Vagrant Chef Oracle Project
 
-Knife needs to be configured to know where the cookbooks are located with the `cookbook_path` setting. If this is not set, then several cookbook operations will fail to work properly.
+Cookbook recipes to create (2) 64-bit Ubuntu Server-based Oracle/Java Development VMs with all applications other than an IDE, to build and test Java EE projects.
 
-    cookbook_path ["./cookbooks"]
+#### Major Components
+* Oracle JDK 1.7.0_45-b18 64-bit for Linux x86-64 (apps vm)
+* Oracle-related Environment variables (apps vm)
+* Oracle WebLogic Server 12c (12.1.2) (apps vm)
+* WLS domain and admin server (apps vm)
+* Oracle Database Express Edition 11g Release 2 (11.2) for Linux x86-64 (dbs vm)
 
-This setting tells knife to look for the cookbooks directory in the present working directory. This means the knife cookbook subcommands need to be run in the `chef-repo` directory itself. To make sure that the cookbooks can be found elsewhere inside the repository, use an absolute path. This is a Ruby file, so something like the following can be used:
+</br>
+#### Recipes Tested and Working
+The following recipes are included in the '`dev-setup`' cookbook:
 
-    current_dir = File.dirname(__FILE__)
-    cookbook_path ["#{current_dir}/../cookbooks"]
 
-Which will set `current_dir` to the location of the knife.rb file itself (e.g. `~/chef-repo/.chef/knife.rb`).
+| **Recipe**            | **Description**                                    |
+|-----------------------|----------------------------------------------------|
+| install-java          | Installs Oracle JDK 1.7.0_45                       |
+| install-env-vars      | Installs Oracle-related environment variables      |
+| create-swapfile       | Creates swapfile for WebLogic Server installer     |
+| install-wls           | Installs Oracle WebLogic Server 12c                |
+| install-wls-domain    | Creates one WLS domain and admin server            |
+| install-express       | Installs Oracle Database XE 11g                    |
+| remove-swapfile       | Removes swapfile used by WebLogic Server installer |
 
-Configure knife to use your preferred copyright holder, email contact and license. Add the following lines to `.chef/knife.rb`.
+</br>
+#### Third-Party Files
+The '`dev-setup`' cookbook requires the below files be downloaded to separate '`chef-artifacts`' directory, in same parent folder as this git repo. Since these files are so large, I download them ahead of time and use VirtualBox's synced folder feature to copy them into VM.
+* [jdk-7u45-linux-x64.tar.gz](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
+* [wls_121200.jar](http://www.oracle.com/technetwork/middleware/weblogic/downloads/wls-for-dev-1703574.html)
+* [oracle-xe-11.2.0-1.0.x86_64.rpm.zip](http://www.oracle.com/technetwork/database/database-technologies/express-edition/downloads/index.html)
 
-    cookbook_copyright "Example, Com."
-    cookbook_email     "cookbooks@example.com"
-    cookbook_license   "apachev2"
-
-Supported values for `cookbook_license` are "apachev2", "mit","gplv2","gplv3",  or "none". These settings are used to prefill comments in the default recipe, and the corresponding values in the metadata.rb. You are free to change the the comments in those files.
-
-Create new cookbooks in this directory with Knife.
-
-    knife cookbook create COOKBOOK
-
-This will create all the cookbook directory components. You don't need to use them all, and can delete the ones you don't need. It also creates a README file, metadata.rb and default recipe.
-
-You can also download cookbooks directly from the Opscode Cookbook Site. There are two subcommands to help with this depending on what your preference is.
-
-The first and recommended method is to use a vendor branch if you're using Git. This is automatically handled with Knife.
-
-    knife cookbook site install COOKBOOK
-
-This will:
-
-* Download the cookbook tarball from cookbooks.opscode.com.
-* Ensure its on the git master branch.
-* Checks for an existing vendor branch, and creates if it doesn't.
-* Checks out the vendor branch (chef-vendor-COOKBOOK).
-* Removes the existing (old) version.
-* Untars the cookbook tarball it downloaded in the first step.
-* Adds the cookbook files to the git index and commits.
-* Creates a tag for the version downloaded.
-* Checks out the master branch again.
-* Merges the cookbook into master.
-* Repeats the above for all the cookbooks dependencies, downloading them from the community site
-
-The last step will ensure that any local changes or modifications you have made to the cookbook are preserved, so you can keep your changes through upstream updates.
-
-If you're not using Git, use the site download subcommand to download the tarball.
-
-    knife cookbook site download COOKBOOK
-
-This creates the COOKBOOK.tar.gz from in the current directory (e.g., `~/chef-repo`). We recommend following a workflow similar to the above for your version control tool.
+</br>
+#### Vargrant Box
+The '`dev-setup`' cookbook was tested with VMs based on Ubuntu Cloud Images.
+* Preferred: [Ubuntu Server 13.10 (Saucy Salamander) 64-bit daily build](http://cloud-images.ubuntu.com/vagrant/saucy/current/saucy-server-cloudimg-amd64-vagrant-disk1.box)
+* Alternate: [Ubuntu Server 12.04 LTS (Precise Pangolin) 64-bit daily build](http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box)
