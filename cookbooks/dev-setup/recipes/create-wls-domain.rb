@@ -83,7 +83,7 @@ template "#{domains_home_tmp}/enable-tunneling.py" do
   not_if { ::File.exists?("#{domains_home_tmp}/enable-tunneling.py") }
 end
 
-# enable tunneling with WLST
+# enable tunneling with WLST using recorded jython script
 # 'java weblogic.WLST' should work but get class not found error?
 bash 'enable-tunneling' do
   cwd domains_home_tmp
