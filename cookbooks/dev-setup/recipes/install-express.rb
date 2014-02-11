@@ -121,7 +121,7 @@ end
 template "#{Chef::Config[:file_cache_path]}/Disk1/response/xe.rsp" do
   source "xe.rsp.erb"
   mode 0755
-  not_if { ::File.exists?("#{Chef::Config[:file_cache_path]}/Disk1/response/xe.rsp") }
+  not_if { ::File.exists?("/tmp/install-express.log") }
 end
 
 # second attempt to fix memory error
