@@ -145,7 +145,7 @@ esac
   EOF
   chmod 755 /etc/rc2.d/S01shm_load 
   EOH
-  not_if { ::File.exists?("/etc/init.d/oracle-xe") }
+  not_if { ::File.exists?("/tmp/install-express.log") }
 end
 
 # environment variables are set properly each time you log in or open a new shell
@@ -164,7 +164,7 @@ export PATH=$ORACLE_HOME/bin:$PATH"
   user node['dev']['global_user']
   group node['dev']['global_group']
   action :run
-  not_if { ::File.exists?("/etc/init.d/oracle-xe") }
+  not_if { ::File.exists?("/tmp/install-express.log") }
 end
 
 # install Oracle Database XE
@@ -175,7 +175,7 @@ bash "install-express" do
     > /tmp/install-express.log
   EOH
   action :run
-  not_if { ::File.exists?("/etc/init.d/oracle-xe") }
+  not_if { ::File.exists?("/tmp/install-express.log") }
 end
 
 # configure Oracle Database XE
@@ -192,9 +192,9 @@ end
 # set Oracle Database XE environment variables
 bash "set-express-env-vars" do
   cwd "/u01/app/oracle/product/11.2.0/xe/bin"
-  code ". ./oracle_env.sh"
+  code ". ./oracle_env.sh > /tmp/set-express-env-vars.log"
   action :run
   user node['dev']['global_user']
   group node['dev']['global_group']
-  not_if { ::File.exists?("/etc/init.d/oracle-xe") }
+  not_if { ::File.exists?("/tmp/set-express-env-vars.log") }
 end
