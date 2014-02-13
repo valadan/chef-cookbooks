@@ -149,22 +149,50 @@ esac
 end
 
 # environment variables are set properly each time you log in or open a new shell
-bash "bash-login" do
+bash "bashrc-config" do
+cwd "#{node['dev']['global_user_home']}"
 code <<-EOH
-  echo "
+  grep -q ORACLE_HOME .bashrc
+  if [ $? -ne 0 ]; then
+    echo "
 . /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
 export ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe
 export ORACLE_SID=XE
-export NLS_LANG=`$ORACLE_HOME/bin/nls_lang.sh`
+export NLS_LANG=AMERICAN_AMERICA.AL32UTF8
 export ORACLE_BASE=/u01/app/oracle
-export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
-export PATH=$ORACLE_HOME/bin:$PATH"
-  >> #{node['dev']['global_user_home']}/.bashrc
+export LD_LIBRARY_PATH=/u01/app/oracle/product/11.2.0/xe/lib:${LD_LIBRARY_PATH}
+export PATH=/u01/app/oracle/product/11.2.0/xe/bin:${PATH}" >> .bashrc
+  fi
+EOH
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+  action :run
+end
+
+# set variables temporarily for immediate use
+# NLS_LANG /u01/app/oracle/product/11.2.0/xe/bin/nls_lang.sh
+bash "temp-install-env-vars" do
+  code <<-EOH
+. /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
+export ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe
+export ORACLE_SID=XE
+export NLS_LANG=AMERICAN_AMERICA.AL32UTF8
+export ORACLE_BASE=/u01/app/oracle
+export LD_LIBRARY_PATH=/u01/app/oracle/product/11.2.0/xe/lib:${LD_LIBRARY_PATH}
+export PATH=/u01/app/oracle/product/11.2.0/xe/bin:${PATH}
   EOH
   user node['dev']['global_user']
   group node['dev']['global_group']
   action :run
-  not_if { ::File.exists?("/tmp/install-express.log") }
+end
+
+# This doesn't work as expected with chef?
+bash "bash-login" do
+  cwd "#{node['dev']['global_user_home']}"
+  code ". .bashrc"
+  user node['dev']['global_user']
+  group node['dev']['global_group']
+  action :run
 end
 
 # install Oracle Database XE
@@ -181,7 +209,7 @@ end
 # configure Oracle Database XE
 bash "configure-express" do
     code <<-EOH
-      /etc/init.d/oracle-xe configure \
+      sudo /etc/init.d/oracle-xe configure \
       responseFile=#{Chef::Config[:file_cache_path]}/Disk1/response/xe.rsp \
       > /tmp/configure-express.log
     EOH
@@ -189,6 +217,7 @@ bash "configure-express" do
 action :run
 end
 
+=begin
 # set Oracle Database XE environment variables
 bash "set-express-env-vars" do
   cwd "/u01/app/oracle/product/11.2.0/xe/bin"
@@ -198,3 +227,4 @@ bash "set-express-env-vars" do
   group node['dev']['global_group']
   not_if { ::File.exists?("/tmp/set-express-env-vars.log") }
 end
+=end
