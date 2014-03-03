@@ -21,12 +21,6 @@
 # http://docs.oracle.com/cd/E17781_01/install.112/e18802/toc.htm#BABCEAHD
 # http://docs.oracle.com/cd/E17781_01/install.112/e18802/toc.htm
 
-# apt update/upgrade
-bash "apt-update" do
-  code "sudo apt-get update -y && sudo apt-get upgrade -y"
-  action :run
-end
-
 # install required packages
 %w{unixodbc unzip alien libaio1}.each do |pkg|
   package pkg do
